@@ -429,13 +429,17 @@ export class DatabaseStorage implements IStorage {
 
   // User hero selection operations
   async getUserHeroSelection(userId: string): Promise<UserHeroSelection | undefined> {
-    const result = await db.execute(sql`
-      SELECT * FROM user_hero_selections 
-      WHERE user_id = ${userId} AND is_active = true 
-      ORDER BY created_at DESC LIMIT 1
-    `);
+    const [result] = await db
+      .select()
+      .from(userHeroSelections)
+      .where(and(
+        eq(userHeroSelections.userId, userId),
+        eq(userHeroSelections.isActive, true)
+      ))
+      .orderBy(desc(userHeroSelections.createdAt))
+      .limit(1);
 
-    return result.rows[0] as UserHeroSelection | undefined;
+    return result;
   }
 
   async getHeroImageById(heroImageId: string): Promise<HeroImage | undefined> {
