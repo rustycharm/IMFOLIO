@@ -1654,6 +1654,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Photo not found or access denied" });
       }
 
+      // SECURITY: Validate that custom image is from user's own folder, not global hero folder
+      if (photo.imageUrl.includes('global/hero-images/')) {
+        console.error(`🚫 SECURITY VIOLATION: User ${userId} attempted to use global hero image as custom: ${photo.imageUrl}`);
+        return res.status(403).json({ message: "Security violation: Cannot use global hero images as custom" });
+      }
+
+      // SECURITY: Ensure the image URL contains the user's ID
+      if (!photo.imageUrl.includes(`/${userId}/`)) {
+        console.error(`🚫 SECURITY VIOLATION: User ${userId} attempted to access non-owned image: ${photo.imageUrl}`);
+        return res.status(403).json({ message: "Security violation: Image does not belong to user" });
+      }
+
       // Set custom hero image using the photo's URL and title
       await storage.setUserHeroSelection({
         userId: String(userId),
@@ -1662,7 +1674,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customImageTitle: photo.title || 'Custom Hero Image'
       });
 
-      console.log(`User ${userId} set custom hero image from photo ${photoId}`);
+      console.log(`✅ User ${userId} set custom hero image from photo ${photoId} (validated)`);
 
       res.json({
         message: "Custom hero image set successfully",

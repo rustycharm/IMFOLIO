@@ -141,7 +141,7 @@ function validateImageHeader(buffer: Buffer, mimeType: string): boolean {
   if (buffer.length < 12) return false;
 
   const header = buffer.subarray(0, 12);
-  
+
   switch (mimeType) {
     case 'image/jpeg':
     case 'image/jpg':
@@ -177,19 +177,29 @@ export async function uploadImage(
     const randomId = Math.random().toString(36).substring(2);
     const fileExtension = getFileExtension(options.mimeType);
     const imageType = options.imageType || 'photo';
-    
+
     let key: string;
-    
-    // CORE FIX: Hero images ALWAYS go to global folder, user photos go to user folders
+
+    // SECURITY: Hero images MUST ALWAYS go to global folder - NO EXCEPTIONS
     if (imageType === 'hero') {
-      // Hero images go to global folder - no user ID in path
+      // CRITICAL: Hero images ONLY in global/hero-images/ - never in user folders
       key = `global/hero-images/${timestamp}-${randomId}${fileExtension}`;
+
+      // Additional security validation
+      if (!key.startsWith('global/hero-images/')) {
+        throw new Error('SECURITY VIOLATION: Hero images must be stored in global/hero-images/ only');
+      }
     } else {
       // User photos (profile, portfolio) go to user-specific folders
       const date = new Date();
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       key = `${imageType}/${options.userId}/${year}/${month}/${timestamp}-${randomId}${fileExtension}`;
+
+      // Security validation: prevent user uploads from accessing global hero folder
+      if (key.includes('global/hero-images/')) {
+        throw new Error('SECURITY VIOLATION: User uploads cannot access global hero images folder');
+      }
     }
 
     console.log(`📸 Uploading image: ${key} (${formatBytes(imageBuffer.length)})`);
@@ -205,7 +215,7 @@ export async function uploadImage(
     }
 
     const url = getPublicUrl(key);
-    
+
     // Log actual file size for storage tracking
     const { logFileUpload } = await import('./storage-tracking');
     await logFileUpload(
@@ -215,7 +225,7 @@ export async function uploadImage(
       imageBuffer.length,
       imageType as 'photo' | 'hero' | 'profile'
     );
-    
+
     console.log(`✅ Successfully uploaded: ${key}`);
 
     return {
@@ -235,7 +245,7 @@ export async function uploadImage(
  */
 async function uploadWithRetry(client: Client, key: string, buffer: Buffer, maxRetries: number = 3): Promise<void> {
   let lastError: Error | null = null;
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       await client.uploadFromBytes(key, buffer);
@@ -243,7 +253,7 @@ async function uploadWithRetry(client: Client, key: string, buffer: Buffer, maxR
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       console.warn(`Upload attempt ${attempt}/${maxRetries} failed:`, lastError.message);
-      
+
       if (attempt < maxRetries) {
         // Wait before retry (exponential backoff)
         const delay = Math.pow(2, attempt) * 1000;
@@ -251,7 +261,7 @@ async function uploadWithRetry(client: Client, key: string, buffer: Buffer, maxR
       }
     }
   }
-  
+
   throw lastError || new Error('Upload failed after all retries');
 }
 
@@ -272,9 +282,9 @@ function formatBytes(bytes: number): string {
 export async function deleteImage(key: string): Promise<boolean> {
   try {
     await storageManager.ensureHealthy();
-    
+
     const client = storageManager.getClient();
-    
+
     // Check if file exists before attempting deletion
     const exists = await client.exists(key);
     if (!exists.ok || !exists.value) {
@@ -283,19 +293,19 @@ export async function deleteImage(key: string): Promise<boolean> {
     }
 
     console.log(`🗑️ Deleting image: ${key}`);
-    
+
     // Log deletion for storage tracking
     const { logFileDeletion } = await import('./storage-tracking');
     await logFileDeletion(key);
-    
+
     await client.delete(key);
-    
+
     // Verify deletion
     const stillExists = await client.exists(key);
     if (stillExists.ok && stillExists.value) {
       throw new Error('Deletion verification failed - file still exists after deletion');
     }
-    
+
     console.log(`✅ Successfully deleted: ${key}`);
     return true;
   } catch (error) {
@@ -317,19 +327,19 @@ export async function uploadImageToStorage(buffer: Buffer, filename: string): Pr
   // Extract user ID from filename path (assuming format: userId/timestamp-title.ext)
   const userIdMatch = filename.match(/^(\d+)\//);
   const userId = userIdMatch ? parseInt(userIdMatch[1]) : 0;
-  
+
   // Determine MIME type from filename
   const extension = filename.split('.').pop()?.toLowerCase() || 'jpg';
   const mimeType = extension === 'png' ? 'image/png' : 
                    extension === 'webp' ? 'image/webp' : 'image/jpeg';
-  
+
   const options: ImageUploadOptions = {
     userId,
     originalFilename: filename,
     mimeType,
     imageType: 'photo'
   };
-  
+
   return await uploadImage(buffer, options);
 }
 
@@ -350,7 +360,7 @@ function getFileExtension(mimeType: string): string {
     'image/webp': '.webp',
     'image/gif': '.gif'
   };
-  
+
   return mimeToExt[mimeType] || '.jpg';
 }
 
@@ -359,10 +369,10 @@ function getFileExtension(mimeType: string): string {
  */
 function getFileType(key: string): string {
   if (!key) return 'unknown';
-  
+
   // Extract extension
   const extension = key.split('.').pop()?.toLowerCase() || '';
-  
+
   // Common file type categories
   if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'avif'].includes(extension)) {
     return 'image';
@@ -373,7 +383,7 @@ function getFileType(key: string): string {
   } else if (['json', 'xml', 'csv', 'yml', 'yaml'].includes(extension)) {
     return 'data';
   }
-  
+
   return extension || 'other';
 }
 
@@ -383,19 +393,19 @@ function getFileType(key: string): string {
  */
 function extractUserId(key: string): string | null {
   if (!key) return null;
-  
+
   // Try to match user/{userId}/ or portfolio/{userId}/
   const userMatch = key.match(/^(?:user|portfolio)\/(\d+)\//);
   if (userMatch && userMatch[1]) {
     return userMatch[1];
   }
-  
+
   // If no match, try to find any numeric folder that might be a user ID
   const folderMatch = key.match(/\/(\d+)\//);
   if (folderMatch && folderMatch[1]) {
     return folderMatch[1];
   }
-  
+
   return null;
 }
 
@@ -415,23 +425,23 @@ export async function getStorageAnalytics(userId?: number): Promise<{
     console.log('Fetching comprehensive storage analytics from object storage...');
     await storageManager.ensureHealthy();
     const client = storageManager.getClient();
-    
+
     // Get all files from object storage
     // We don't use prefix filtering to get accurate total storage usage
     const result = await client.list();
     if (!result.ok) {
       throw new Error('Failed to list objects from storage');
     }
-    
+
     const files = result.value;
     let totalSize = 0;
     const filesByType: Record<string, number> = {};
     const sizeByType: Record<string, number> = {};
     const userSizes: Record<string, { files: number; size: number }> = {};
     const allFiles: { key: string; size: number; type: string }[] = [];
-    
+
     console.log(`Processing ${files.length} files from object storage for analytics...`);
-    
+
     for (const file of files) {
       const key = (file as any).key || '';
       // For now, estimate reasonable file sizes for images since metadata is unreliable
@@ -442,24 +452,24 @@ export async function getStorageAnalytics(userId?: number): Promise<{
       } else {
         estimatedSize = 1024 * 1024; // 1MB for user photos
       }
-      
+
       const type = getFileType(key);
       console.log(`📊 File: ${key} - Estimated size: ${(estimatedSize/1024/1024).toFixed(2)} MB`);
-      
+
       // Only process files if no user filter specified, or if matches filter
       if (userId === undefined || key.includes(`/user/${userId}/`) || key.includes(`/portfolio/${userId}/`)) {
         // Accumulate total size
         totalSize += estimatedSize;
-        
+
         // Count files by type
         filesByType[type] = (filesByType[type] || 0) + 1;
-        
+
         // Sum size by type
         sizeByType[type] = (sizeByType[type] || 0) + estimatedSize;
-        
+
         // Track file details for largest files reporting
         allFiles.push({ key, size: estimatedSize, type });
-        
+
         // Get user breakdown if possible
         const fileUserId = extractUserId(key);
         if (fileUserId) {
@@ -471,19 +481,19 @@ export async function getStorageAnalytics(userId?: number): Promise<{
         }
       }
     }
-    
+
     // Convert user sizes map to array and sort by size
     const userBreakdown = Object.entries(userSizes).map(([userId, data]) => ({
       userId,
       files: data.files,
       size: data.size
     })).sort((a, b) => b.size - a.size);
-    
+
     // Sort files by size and get the largest ones
     const largestFiles = allFiles
       .sort((a, b) => b.size - a.size)
       .slice(0, 10); // Get top 10 largest files
-    
+
     return {
       totalFiles: files.length,
       totalSize,
@@ -510,26 +520,26 @@ export async function getStorageAnalytics(userId?: number): Promise<{
 function processStorageItem(key: string, size: number, filesByType: Record<string, number>, 
   sizeByType: Record<string, number>, userSizes: Record<string, { files: number; size: number }>,
   allFiles: { key: string; size: number; type: string }[]): number {
-  
+
   // Extract user ID from the file path if possible
   const userMatch = key.match(/^.+\/(\d+)\//);
   const extractedUserId = userMatch ? userMatch[1] : 'unassigned';
   const type = getFileType(key);
-  
+
   // Track by file type
   filesByType[type] = (filesByType[type] || 0) + 1;
   sizeByType[type] = (sizeByType[type] || 0) + size;
-  
+
   // Track by user
   if (!userSizes[extractedUserId]) {
     userSizes[extractedUserId] = { files: 0, size: 0 };
   }
   userSizes[extractedUserId].files += 1;
   userSizes[extractedUserId].size += size;
-  
+
   // Track individual files for largest file analysis
   allFiles.push({ key, size, type });
-  
+
   return size;
 }
 
@@ -539,28 +549,28 @@ function processStorageItem(key: string, size: number, filesByType: Record<strin
 export async function getStorageAnalyticsAdmin() {
   try {
     console.log('🔍 Getting storage analytics for admin dashboard');
-    
+
     const { Client } = await import('@replit/object-storage');
     const client = new Client();
-    
+
     // List all objects in storage to check for data integrity issues
     const listResult = await client.list({ prefix: '' });
     if (!listResult.ok) {
       throw new Error('Failed to list objects in storage');
     }
-    
+
     const files = listResult.value || [];
     console.log(`Found ${files.length} files in object storage`);
-    
+
     let validFiles = 0;
     let corruptedFiles = 0;
     const dataIntegrityIssues = [];
-    
+
     // Check each file for data integrity
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const hasValidKey = file && file.name && typeof file.name === 'string' && file.name.trim() !== '';
-      
+
       if (hasValidKey) {
         validFiles++;
       } else {
@@ -573,21 +583,21 @@ export async function getStorageAnalyticsAdmin() {
         });
       }
     }
-    
+
     // Get REAL database counts
     const { db } = await import('./db');
     const { photos, heroImages, users } = await import('../shared/schema');
     const { isNotNull } = await import('drizzle-orm');
-    
+
     const [photoRows, heroRows, profileRows] = await Promise.all([
       db.select().from(photos),
       db.select().from(heroImages),
       db.select().from(users).where(isNotNull(users.profileImageUrl))
     ]);
-    
+
     const dbFileCount = photoRows.length + heroRows.length + profileRows.length;
     const estimatedSize = (photoRows.length * 1024 * 1024) + (heroRows.length * 512 * 1024) + (profileRows.length * 256 * 1024);
-    
+
     const auditResult = {
       totalFiles: dbFileCount,
       totalSize: `${(estimatedSize / 1024 / 1024).toFixed(1)}MB`,
@@ -600,17 +610,17 @@ export async function getStorageAnalyticsAdmin() {
       lastRun: new Date().toISOString(),
       status: '✅ Real database counts retrieved'
     };
-    
+
     // Analyze the discrepancy between object storage and database
     const storageToDatabaseDiff = files.length - dbFileCount;
     let integrityStatus = 'HEALTHY';
-    
+
     if (corruptedFiles > 0) {
       integrityStatus = 'CRITICAL_ISSUES_DETECTED';
     } else if (storageToDatabaseDiff > 0) {
       integrityStatus = 'ORPHANED_FILES_DETECTED';
     }
-    
+
     console.log(`🔍 Analysis Results:`);
     console.log(`   Object storage files: ${files.length}`);
     console.log(`   Database file records: ${dbFileCount}`);
@@ -618,7 +628,7 @@ export async function getStorageAnalyticsAdmin() {
     console.log(`   Corrupted files: ${corruptedFiles}`);
     console.log(`   Discrepancy: ${storageToDatabaseDiff}`);
     console.log(`   Integrity status: ${integrityStatus}`);
-    
+
     const recommendations = [];
     if (corruptedFiles > 0) {
       recommendations.push(`CRITICAL: ${corruptedFiles} files have missing/invalid keys`);
@@ -634,7 +644,7 @@ export async function getStorageAnalyticsAdmin() {
       recommendations.push('Storage integrity is healthy');
       recommendations.push('All files properly referenced and accessible');
     }
-    
+
     return {
       totalFiles: files.length,
       validFiles: validFiles,
@@ -671,19 +681,19 @@ export async function findOrphanedFiles(): Promise<{
   try {
     await storageManager.ensureHealthy();
     const client = storageManager.getClient();
-    
+
     // Get all files from object storage
     const result = await client.list();
     if (!result.ok) {
       throw new Error('Failed to list objects from storage');
     }
-    
+
     const files = result.value;
     console.log(`🔍 Scanning ${files.length} files for orphans...`);
-    
+
     const orphanedKeys: string[] = [];
     let totalOrphanedSize = 0;
-    
+
     // Check each file against database
     for (const file of files) {
       const key = (file as any).key;
@@ -695,9 +705,9 @@ export async function findOrphanedFiles(): Promise<{
         totalOrphanedSize += (file as any).size || 0;
       }
     }
-    
+
     console.log(`🗑️ Found ${orphanedKeys.length} orphaned files (${formatBytes(totalOrphanedSize)})`);
-    
+
     return { orphanedKeys, totalOrphanedSize };
   } catch (error) {
     console.error('Failed to find orphaned files:', error);
@@ -714,7 +724,7 @@ export async function cleanupOrphanedFiles(dryRun: boolean = true): Promise<{
   errors: string[];
 }> {
   const { orphanedKeys, totalOrphanedSize } = await findOrphanedFiles();
-  
+
   if (dryRun) {
     console.log(`🧹 DRY RUN: Would delete ${orphanedKeys.length} files (${formatBytes(totalOrphanedSize)})`);
     return {
@@ -725,11 +735,11 @@ export async function cleanupOrphanedFiles(dryRun: boolean = true): Promise<{
   }
 
   console.log(`🧹 DELETING ${orphanedKeys.length} orphaned files...`);
-  
+
   let deletedCount = 0;
   let deletedSize = 0;
   const errors: string[] = [];
-  
+
   for (const key of orphanedKeys) {
     try {
       await deleteImage(key);
@@ -740,9 +750,9 @@ export async function cleanupOrphanedFiles(dryRun: boolean = true): Promise<{
       errors.push(`Failed to delete ${key}: ${errorMessage}`);
     }
   }
-  
+
   console.log(`✅ Cleanup complete: ${deletedCount} files deleted, ${errors.length} errors`);
-  
+
   return { deletedCount, deletedSize, errors };
 }
 
@@ -753,14 +763,14 @@ async function isFileReferencedInDatabase(key: string): Promise<boolean> {
   // Import database here to avoid circular dependencies
   const { db } = await import('./db');
   const { photos, heroImages } = await import('../shared/schema');
-  
+
   try {
     // Import SQL operators
     const { like, or } = await import('drizzle-orm');
-    
+
     // Generate the expected public URL for this storage key
     const expectedUrl = getPublicUrl(key);
-    
+
     // Check in photos table - user photos are base64 data URLs, so only check for object storage references
     const photoResults = await db
       .select({ id: photos.id })
@@ -770,17 +780,17 @@ async function isFileReferencedInDatabase(key: string): Promise<boolean> {
         like(photos.imageUrl, `%${expectedUrl}%`)
       ))
       .limit(1);
-    
+
     if (photoResults.length > 0) {
       console.log(`✅ File ${key} is referenced in photos table`);
       return true;
     }
-    
+
     // For hero images, check if the key matches the pattern
     // Hero images in DB use paths like "/images/global/hero-images/northern-lights.jpg"
     // But storage keys might be like "hero/northern-lights.jpg" or "global/hero-images/northern-lights.jpg"
     const filename = key.split('/').pop(); // Get just the filename
-    
+
     const heroResults = await db
       .select({ id: heroImages.id, url: heroImages.url })
       .from(heroImages)
@@ -790,12 +800,12 @@ async function isFileReferencedInDatabase(key: string): Promise<boolean> {
         like(heroImages.url, `%${filename}%`) // Check if filename matches
       ))
       .limit(1);
-    
+
     if (heroResults.length > 0) {
       console.log(`✅ File ${key} is referenced in hero images table: ${heroResults[0].url}`);
       return true;
     }
-    
+
     // Hero images are legitimate files - if this looks like a hero image, keep it
     if (key.includes('hero') || key.includes('northern-lights') || key.includes('ocean-waves') || 
         key.includes('forest-path') || key.includes('cherry-blossoms') || key.includes('autumn-colors') ||
@@ -803,7 +813,7 @@ async function isFileReferencedInDatabase(key: string): Promise<boolean> {
       console.log(`✅ File ${key} appears to be a legitimate hero image`);
       return true;
     }
-    
+
     // For 0 byte usage, all files are essentially free - mark as legitimate
     console.log(`✅ File ${key} marked as legitimate (0 byte storage usage)`);
     return true;
@@ -838,35 +848,35 @@ export async function cleanupCorruptedAndOrphanedFiles(dryRun: boolean = true): 
     console.log(`🧹 Starting storage cleanup (dry run: ${dryRun})...`);
     await storageManager.ensureHealthy();
     const client = storageManager.getClient();
-    
+
     // Get all files from storage
     const result = await client.list();
     if (!result.ok) {
       throw new Error('Failed to list objects from storage');
     }
-    
+
     const files = result.value;
     const errors: string[] = [];
     const details: Array<{type: string, action: string, file: any}> = [];
-    
+
     let corruptedFilesFound = 0;
     let corruptedFilesDeleted = 0;
     let orphanedFilesFound = 0;
     let orphanedFilesDeleted = 0;
-    
+
     console.log(`📋 Analyzing ${files.length} files for cleanup...`);
-    
+
     // Get database file references for orphan detection
     const { db } = await import('./db');
     const { photos, heroImages, users } = await import('../shared/schema');
     const { isNotNull } = await import('drizzle-orm');
-    
+
     const [photoRows, heroRows, profileRows] = await Promise.all([
       db.select().from(photos),
       db.select().from(heroImages),
       db.select().from(users).where(isNotNull(users.profileImageUrl))
     ]);
-    
+
     // Create set of valid file keys from database
     const validKeys = new Set<string>();
     photoRows.forEach((photo: any) => {
@@ -887,25 +897,25 @@ export async function cleanupCorruptedAndOrphanedFiles(dryRun: boolean = true): 
         validKeys.add(key);
       }
     });
-    
+
     console.log(`✅ Found ${validKeys.size} valid file references in database`);
-    
+
     // Analyze and cleanup each file
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const key = (file as any).name || (file as any).key;
-      
-      // Check for corrupted files (missing/invalid keys)
+
+      //      // Check for corrupted files (missing/invalid keys)
       if (!key || key === 'undefined' || key === null || key === '' || key === 'null' || key.length < 3) {
         corruptedFilesFound++;
         console.log(`🚨 Corrupted file found: key="${key}", size=${(file as any).size || 0}`);
-        
+
         details.push({
           type: 'CORRUPTED',
           action: dryRun ? 'WOULD_DELETE' : 'DELETED',
           file: { index: i, key: key, size: (file as any).size, raw: JSON.stringify(file).substring(0, 100) }
         });
-        
+
         // Note: Corrupted files with invalid keys cannot be deleted easily
         // This would require direct object storage intervention
         if (!dryRun) {
@@ -914,19 +924,19 @@ export async function cleanupCorruptedAndOrphanedFiles(dryRun: boolean = true): 
         }
         continue;
       }
-      
+
       // Check for orphaned files (valid key but not in database)
       const cleanKey = key.startsWith('/images/') ? key.replace('/images/', '') : key;
       if (!validKeys.has(cleanKey)) {
         orphanedFilesFound++;
         console.log(`🔍 Orphaned file found: "${key}" (not referenced in database)`);
-        
+
         details.push({
           type: 'ORPHANED',
           action: dryRun ? 'WOULD_DELETE' : 'DELETED',
           file: { key: key, cleanKey: cleanKey, size: (file as any).size }
         });
-        
+
         if (!dryRun) {
           try {
             await client.delete(key);
@@ -938,7 +948,7 @@ export async function cleanupCorruptedAndOrphanedFiles(dryRun: boolean = true): 
         }
       }
     }
-    
+
     const summary = {
       corruptedFilesFound,
       corruptedFilesDeleted,
@@ -947,12 +957,12 @@ export async function cleanupCorruptedAndOrphanedFiles(dryRun: boolean = true): 
       errors,
       details: details.slice(0, 20) // Limit details for response size
     };
-    
+
     console.log(`🧹 Cleanup ${dryRun ? 'analysis' : 'execution'} complete:`);
     console.log(`   Corrupted files: ${corruptedFilesFound} found, ${corruptedFilesDeleted} deleted`);
     console.log(`   Orphaned files: ${orphanedFilesFound} found, ${orphanedFilesDeleted} deleted`);
     console.log(`   Errors: ${errors.length}`);
-    
+
     return summary;
   } catch (error) {
     console.error('Storage cleanup failed:', error);
@@ -968,21 +978,21 @@ export function dataUrlToBuffer(dataUrl: string): { buffer: Buffer; mimeType: st
   if (!matches) {
     throw new Error('Invalid data URL format');
   }
-  
+
   const mimeType = matches[1];
   const base64Data = matches[2];
-  
+
   // Validate MIME type
   if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
     throw new Error(`Unsupported MIME type: ${mimeType}`);
   }
-  
+
   const buffer = Buffer.from(base64Data, 'base64');
-  
+
   // Validate minimum size
   if (buffer.length < 1024) {
     throw new Error('Image data is too small to be valid');
   }
-  
+
   return { buffer, mimeType };
 }
