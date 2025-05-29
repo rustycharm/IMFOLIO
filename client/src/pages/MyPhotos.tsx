@@ -107,19 +107,44 @@ export default function MyPhotos() {
         }
       });
     },
+    onMutate: async ({ id, featured }) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ['/api/user/photos'] });
+
+      // Snapshot the previous value
+      const previousPhotos = queryClient.getQueryData(['/api/user/photos']);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(['/api/user/photos'], (old: any) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((photo: any) => 
+          photo.id === id ? { ...photo, featured } : photo
+        );
+      });
+
+      // Return a context object with the snapshotted value
+      return { previousPhotos };
+    },
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousPhotos) {
+        queryClient.setQueryData(['/api/user/photos'], context.previousPhotos);
+      }
+      toast({
+        title: "Update failed",
+        description: "Featured status could not be updated.",
+        variant: "destructive"
+      });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user/photos'] });
       toast({
         title: "Photo updated",
         description: "Featured status has been updated successfully."
       });
     },
-    onError: (error: any) => {
-      toast({
-        title: "Update failed",
-        description: error.message,
-        variant: "destructive"
-      });
+    onSettled: () => {
+      // Always refetch after error or success to ensure server state
+      queryClient.invalidateQueries({ queryKey: ['/api/user/photos'] });
     }
   });
 
