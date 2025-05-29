@@ -439,13 +439,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getHeroImageById(heroImageId: string): Promise<HeroImage | undefined> {
-    console.log('🔍 getHeroImageById called with ID:', heroImageId);
-    const [heroImage] = await db
-      .select()
-      .from(heroImages)
-      .where(eq(heroImages.id, heroImageId));
-    console.log('🔍 getHeroImageById result:', heroImage);
-    return heroImage || undefined;
+    console.log('🔍 getHeroImageById called with ID:', heroImageId, 'type:', typeof heroImageId);
+    
+    try {
+      const result = await db
+        .select()
+        .from(heroImages)
+        .where(eq(heroImages.id, heroImageId));
+      
+      console.log('🔍 getHeroImageById raw result:', result);
+      console.log('🔍 getHeroImageById result length:', result.length);
+      
+      const heroImage = result[0];
+      console.log('🔍 getHeroImageById first item:', heroImage);
+      console.log('🔍 getHeroImageById returning:', heroImage || undefined);
+      
+      return heroImage || undefined;
+    } catch (error) {
+      console.error('🔍 getHeroImageById error:', error);
+      return undefined;
+    }
   }
 
   async updateHeroImageColors(heroImageId: string, colorData: {
