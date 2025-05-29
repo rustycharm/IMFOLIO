@@ -1523,25 +1523,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Fall back to global hero image selection
-      console.log('🔄 Checking for global hero image selection...');
-      console.log('🔄 selection exists:', !!selection);
-      console.log('🔄 selection.heroImageId exists:', !!selection?.heroImageId);
-      console.log('🔄 selection.heroImageId value:', selection?.heroImageId);
-      
       if (selection && selection.heroImageId) {
-        console.log('Looking for hero image with ID:', selection.heroImageId);
         const heroImage = await storage.getHeroImageById(selection.heroImageId);
-        console.log('Hero image details found:', heroImage);
 
         if (heroImage) {
-          console.log('Returning user hero image:', heroImage);
           res.json(heroImage);
           return;
-        } else {
-          console.log('Hero image not found for ID:', selection.heroImageId);
         }
-      } else {
-        console.log('🔄 No valid selection or heroImageId found, skipping hero image lookup');
       }
 
       // Fallback to default hero image if no selection or hero image not found
