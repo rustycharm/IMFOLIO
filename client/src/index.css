@@ -1,0 +1,193 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --ring: 240 5% 64.9%;
+    --radius: 0.5rem;
+    
+    /* Chart colors */
+    --chart-1: 240 5.9% 10%;
+    --chart-2: 240 5.9% 30%;
+    --chart-3: 240 5.9% 50%;
+    --chart-4: 240 5.9% 70%;
+    --chart-5: 240 5.9% 90%;
+    
+    /* Sidebar colors */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 10% 3.9%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 240 5.9% 90%;
+    --sidebar-ring: 240 5.9% 10%;
+  }
+  
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --ring: 240 4.9% 83.9%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    @apply antialiased bg-background text-foreground font-light;
+  }
+
+  /* Mobile-first approach using Tailwind utilities */
+  html {
+    @apply overflow-x-hidden scroll-smooth;
+  }
+
+  body {
+    @apply overflow-x-hidden w-full max-w-full;
+  }
+
+  /* Mobile scrollbar optimization using Tailwind breakpoints */
+  @media (max-width: theme('screens.md')) {
+    body {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    body::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  /* Touch-friendly elements using Tailwind's interaction utilities */
+  @supports (hover: none) and (pointer: coarse) {
+    .touch-target {
+      @apply min-h-[44px] min-w-[44px];
+    }
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-light tracking-wide;
+  }
+  
+  a {
+    @apply transition-colors duration-200;
+  }
+}
+
+/* Gallery */
+.masonry-grid {
+  @apply grid gap-4 sm:gap-6;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-auto-flow: dense;
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.image-card {
+  @apply transition-all duration-500 transform;
+}
+
+.image-card:hover {
+  @apply -translate-y-1 shadow-lg;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Lightbox */
+.lightbox {
+  @apply bg-black bg-opacity-95 transition-opacity duration-300;
+}
+
+.overlay {
+  @apply transition-opacity duration-300;
+}
+
+/* Transparent Navbar */
+.navbar-transparent {
+  @apply bg-black/20 backdrop-blur-sm border-transparent;
+}
+
+.navbar-scroll {
+  @apply bg-white/95 backdrop-blur-sm border-border shadow-sm;
+}
+
+/* Button styles */
+.btn-minimal {
+  @apply bg-transparent border border-white/30 text-white hover:bg-white/10 transition-all duration-300;
+}
+
+.btn-minimal.active {
+  @apply border-white bg-white/10;
+}
+
+/* Custom scrollbar for category carousel */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 100, 100, 0.7) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 100, 100, 0.7);
+  border-radius: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(120, 120, 120, 0.9);
+}
