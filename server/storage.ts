@@ -19,7 +19,7 @@ import {
   type InsertPhoto,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, sql, and } from "drizzle-orm";
+import { eq, sql, and, desc } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -124,7 +124,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPhotosByUserId(userId: string): Promise<Photo[]> {
-    return await db.select().from(photos).where(eq(photos.userId, userId));
+    return await db.select().from(photos).where(eq(photos.userId, userId)).orderBy(photos.id);
   }
 
   // Alias for consistency with API endpoints
