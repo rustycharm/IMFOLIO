@@ -12,6 +12,7 @@ import About from "@/components/About";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import NotFound from "@/pages/not-found";
+import { PhotoLightbox } from "@/components/PhotoLightbox";
 
 type PhotographerProfile = {
   id: number;
@@ -299,6 +300,18 @@ export default function Portfolio() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Photo Lightbox */}
+      <PhotoLightbox
+        isOpen={!!selectedPhoto}
+        photos={visiblePhotos}
+        currentIndex={selectedIndex}
+        onClose={handleCloseLightbox}
+        onNavigate={(direction) => {
+          if (direction === 'next') handleNextPhoto();
+          else handlePrevPhoto();
+        }}
+      />
     </div>
   );
 }
