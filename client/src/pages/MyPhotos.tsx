@@ -159,19 +159,43 @@ export default function MyPhotos() {
         }
       });
     },
+    onMutate: async ({ id, isPublic }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/user/photos'] });
+
+      // Snapshot the previous value
+      const previousPhotos = queryClient.getQueryData(['/api/user/photos']);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(['/api/user/photos'], (old: any) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((photo: any) => 
+          photo.id === id ? { ...photo, isPublic } : photo
+        );
+      });
+
+      return { previousPhotos };
+    },
+    onError: (err, variables, context) => {
+      // Roll back on error
+      if (context?.previousPhotos) {
+        queryClient.setQueryData(['/api/user/photos'], context.previousPhotos);
+      }
+      toast({
+        title: "Update failed",
+        description: "Privacy status could not be updated.",
+        variant: "destructive"
+      });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user/photos'] });
       toast({
         title: "Photo updated",
         description: "Privacy status has been updated successfully."
       });
     },
-    onError: (error: any) => {
-      toast({
-        title: "Update failed",
-        description: error.message,
-        variant: "destructive"
-      });
+    onSettled: () => {
+      // Always refetch to ensure server state
+      queryClient.invalidateQueries({ queryKey: ['/api/user/photos'] });
     }
   });
 
