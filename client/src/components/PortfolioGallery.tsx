@@ -23,17 +23,30 @@ const PortfolioGallery = ({
 }: PortfolioGalleryProps) => {
   const [featuredPhotoIndex, setFeaturedPhotoIndex] = useState(0);
   
-  // Filter photos by category if needed
-  const displayPhotos = useMemo(() => {
+  // Filter and organize photos by category and featured status
+  const { displayPhotos, featuredPhotos, regularPhotos } = useMemo(() => {
     if (!photos || !Array.isArray(photos) || photos.length === 0) {
-      return [];
+      return { displayPhotos: [], featuredPhotos: [], regularPhotos: [] };
     }
     
-    if (selectedCategory === "all") {
-      return photos;
+    // Filter by category first
+    let filteredPhotos = photos;
+    if (selectedCategory !== "all") {
+      filteredPhotos = photos.filter(photo => photo.category === selectedCategory);
     }
     
-    return photos.filter(photo => photo.category === selectedCategory);
+    // Separate featured and regular photos
+    const featured = filteredPhotos.filter(photo => photo.featured === true);
+    const regular = filteredPhotos.filter(photo => photo.featured !== true);
+    
+    // For carousel: prioritize featured photos, then regular photos
+    const displayOrder = [...featured, ...regular];
+    
+    return { 
+      displayPhotos: displayOrder, 
+      featuredPhotos: featured, 
+      regularPhotos: regular 
+    };
   }, [photos, selectedCategory]);
 
   useEffect(() => {
