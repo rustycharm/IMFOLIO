@@ -377,7 +377,7 @@ export default function MyPhotos() {
             <Card className="text-center">
               <CardContent className="pt-6">
                 <div className="text-5xl font-light mb-2">
-                  {filteredPhotos.filter(p => p.isFeatured).length}
+                  {filteredPhotos.filter(p => p.featured).length}
                 </div>
                 <p className="text-gray-500 font-medium">Featured</p>
               </CardContent>
@@ -468,7 +468,7 @@ export default function MyPhotos() {
                         </TableCell>
                         <TableCell>
                           <Switch
-                            checked={photo.isFeatured}
+                            checked={photo.featured}
                             onCheckedChange={(checked) => 
                               updateFeaturedMutation.mutate({ id: photo.id, featured: checked })
                             }
