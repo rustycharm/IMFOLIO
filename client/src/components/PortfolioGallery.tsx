@@ -61,15 +61,15 @@ const PortfolioGallery = ({
   }, [selectedCategory]);
 
   const navigateCarousel = (direction: 'prev' | 'next') => {
-    if (!displayPhotos || !displayPhotos.length) return;
+    if (!featuredPhotos || !featuredPhotos.length) return;
     
     if (direction === 'prev') {
       setFeaturedPhotoIndex(prev => 
-        prev === 0 ? displayPhotos.length - 1 : prev - 1
+        prev === 0 ? featuredPhotos.length - 1 : prev - 1
       );
     } else {
       setFeaturedPhotoIndex(prev => 
-        prev === displayPhotos.length - 1 ? 0 : prev + 1
+        prev === featuredPhotos.length - 1 ? 0 : prev + 1
       );
     }
   };
@@ -105,8 +105,8 @@ const PortfolioGallery = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Carousel for first photo if there are enough photos */}
-              {displayPhotos.length > 0 && (
+              {/* Carousel for featured photos only */}
+              {featuredPhotos.length > 0 && (
                 <div className="relative mb-16 rounded-lg overflow-hidden shadow-lg">
                   <div className="w-full aspect-[16/9] relative">
                     <AnimatePresence mode="wait">
@@ -119,25 +119,25 @@ const PortfolioGallery = ({
                         className="absolute inset-0"
                       >
                         <img
-                          src={displayPhotos[featuredPhotoIndex]?.imageUrl}
-                          alt={displayPhotos[featuredPhotoIndex]?.title}
+                          src={featuredPhotos[featuredPhotoIndex]?.imageUrl}
+                          alt={featuredPhotos[featuredPhotoIndex]?.title}
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
                           <div className="p-6 md:p-8 text-white w-full">
                             <h3 className="font-light text-xl md:text-2xl tracking-wide">
-                              {displayPhotos[featuredPhotoIndex]?.title}
+                              {featuredPhotos[featuredPhotoIndex]?.title}
                             </h3>
                             <p className="text-sm uppercase tracking-widest mt-2 text-white/80">
-                              {displayPhotos[featuredPhotoIndex]?.category}
+                              {featuredPhotos[featuredPhotoIndex]?.category}
                             </p>
                           </div>
                         </div>
                       </motion.div>
                     </AnimatePresence>
                     
-                    {/* Navigation arrows - only show if there are multiple photos */}
-                    {displayPhotos.length > 1 && (
+                    {/* Navigation arrows - only show if there are multiple featured photos */}
+                    {featuredPhotos.length > 1 && (
                       <>
                         <Button
                           variant="ghost"
@@ -199,12 +199,6 @@ const PortfolioGallery = ({
                         className="w-full h-auto object-cover aspect-[4/3] sm:aspect-auto"
                         loading="lazy"
                       />
-                      {/* Featured badge */}
-                      {photo.featured && (
-                        <div className="absolute top-3 left-3 bg-yellow-500 text-black px-2 py-1 text-xs font-medium rounded shadow-lg z-10">
-                          FEATURED
-                        </div>
-                      )}
                       <div className="overlay absolute inset-0 bg-black bg-opacity-20 sm:bg-opacity-0 sm:hover:bg-opacity-40 transition-all flex items-end opacity-100 sm:opacity-0 sm:hover:opacity-100">
                         <div className="p-3 sm:p-5 text-white w-full">
                           <div className="flex items-baseline gap-2">
