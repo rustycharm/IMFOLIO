@@ -2,12 +2,16 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Download, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Photo } from "@shared/schema";
-
-type PhotoResponse = Photo & {
+interface PhotoResponse {
+  id: number;
+  title: string;
+  description?: string;
+  imageUrl: string;
+  category?: string;
   photographer?: string;
   photographerUsername?: string;
-};
+  tags?: string[];
+}
 
 interface PhotoLightboxProps {
   isOpen: boolean;
