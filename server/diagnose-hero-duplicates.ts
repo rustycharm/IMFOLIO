@@ -8,15 +8,21 @@ async function diagnoseHeroDuplicates() {
   try {
     const client = new Client();
     
-    // List all files in object storage
-    const allFiles = await client.list();
-    console.log(`📁 Total files in storage: ${allFiles.objects?.length || 0}`);
+    // List all files in object storage, specifically checking global/hero-images/
+    const heroFilesResult = await client.list({ prefix: 'global/hero-images/' });
+    const heroFiles = heroFilesResult.ok ? heroFilesResult.value : [];
+    console.log(`📁 Total files in global/hero-images/: ${heroFiles.length}`);
+    
+    // Also check for any files without prefix to see full storage
+    const allStorageResult = await client.list();
+    const allStorageFiles = allStorageResult.ok ? allStorageResult.value : [];
+    console.log(`📁 Total files in entire storage: ${allStorageFiles.length}`);
     
     // Filter for cherry/blossom related files
-    const cherryFiles = allFiles.objects?.filter(obj => 
+    const cherryFiles = heroFiles.filter(obj => 
       obj.key?.toLowerCase().includes('cherry') || 
       obj.key?.toLowerCase().includes('blossom')
-    ) || [];
+    );
     
     console.log('\n🌸 Cherry/Blossom related files:');
     cherryFiles.forEach(file => {
@@ -24,12 +30,12 @@ async function diagnoseHeroDuplicates() {
     });
     
     // Check for any files that might be hero images in different locations
-    const potentialHeroFiles = allFiles.objects?.filter(obj => 
+    const potentialHeroFiles = allStorageFiles.filter(obj => 
       obj.key?.includes('hero') || 
       obj.key?.includes('global/hero-images/') ||
       obj.key?.includes('cherry') ||
       obj.key?.includes('blossom')
-    ) || [];
+    );
     
     console.log('\n🖼️ All potential hero image files:');
     potentialHeroFiles.forEach(file => {
