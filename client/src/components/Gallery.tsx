@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface GalleryProps {
   selectedCategory: string;
@@ -15,46 +16,69 @@ interface GalleryProps {
 
 const Gallery = ({ selectedCategory, onPhotoClick, setVisiblePhotos }: GalleryProps) => {
   const [featuredPhotoIndex, setFeaturedPhotoIndex] = useState(0);
+  const { isAuthenticated } = useAuth();
 
   const { data: photos, isLoading, error } = useQuery({
     queryKey: [
-      selectedCategory === "all" 
-        ? "/api/photos?featured=true" // Show only featured photos on homepage
-        : `/api/photos?category=${selectedCategory}`
+      isAuthenticated ? "/api/user/photos" : "/api/photos",
+      selectedCategory,
+      isAuthenticated ? "user" : "public"
     ],
     queryFn: async () => {
-      const params = new URLSearchParams();
-      if (selectedCategory === "all") params.append("featured", "true");
-      if (selectedCategory && selectedCategory !== "all") params.append("category", selectedCategory);
+      if (isAuthenticated) {
+        // For logged-in users, fetch their photos from user endpoint
+        const response = await fetch('/api/user/photos');
+        if (!response.ok) throw new Error('Failed to fetch user photos');
+        const userPhotos = await response.json();
+        // Return only public photos for home page display
+        return userPhotos.filter((photo: any) => photo.isPublic === true);
+      } else {
+        // For non-logged-in users, fetch featured photos from public endpoint
+        const params = new URLSearchParams();
+        if (selectedCategory === "all") params.append("featured", "true");
+        if (selectedCategory && selectedCategory !== "all") params.append("category", selectedCategory);
 
-      const response = await fetch(`/api/photos?${params.toString()}`);
-      if (!response.ok) throw new Error('Failed to fetch photos');
-      return response.json();
+        const response = await fetch(`/api/photos?${params.toString()}`);
+        if (!response.ok) throw new Error('Failed to fetch photos');
+        return response.json();
+      }
     }
   });
 
-  // Randomize the display order of featured photos on each load (except the first one)
-  const displayPhotos = useMemo(() => {
+  // Organize photos: featured first, then regular photos
+  const { displayPhotos, featuredPhotos } = useMemo(() => {
     if (!photos || !Array.isArray(photos) || photos.length === 0) {
-      return [];
+      return { displayPhotos: [], featuredPhotos: [] };
     }
 
-    if (selectedCategory === "all") {
-      // Keep the first photo at the top for the carousel
-      const firstPhoto = photos[0];
+    if (isAuthenticated) {
+      // For logged-in users: separate featured and regular photos
+      const featured = photos.filter(photo => photo.featured === true);
+      const regular = photos.filter(photo => photo.featured !== true);
+      
+      return { 
+        displayPhotos: [...featured, ...regular], 
+        featuredPhotos: featured 
+      };
+    } else {
+      // For non-logged-in users: show featured photos from all users
+      if (selectedCategory === "all") {
+        // Keep the first photo at the top for the carousel
+        const firstPhoto = photos[0];
 
-      // Randomize the rest
-      const remainingPhotos = [...photos.slice(1)];
-      for (let i = remainingPhotos.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [remainingPhotos[i], remainingPhotos[j]] = [remainingPhotos[j], remainingPhotos[i]];
+        // Randomize the rest
+        const remainingPhotos = [...photos.slice(1)];
+        for (let i = remainingPhotos.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [remainingPhotos[i], remainingPhotos[j]] = [remainingPhotos[j], remainingPhotos[i]];
+        }
+
+        return { displayPhotos: [firstPhoto, ...remainingPhotos], featuredPhotos: photos };
       }
 
-      return [firstPhoto, ...remainingPhotos];
+      return { displayPhotos: photos, featuredPhotos: photos };
     }
-
-    return photos;
-  }, [photos, selectedCategory]);
+  }, [photos, selectedCategory, isAuthenticated]);
 
   useEffect(() => {
     if (displayPhotos && Array.isArray(displayPhotos)) {
@@ -68,15 +92,16 @@ const Gallery = ({ selectedCategory, onPhotoClick, setVisiblePhotos }: GalleryPr
   }, [selectedCategory]);
 
   const navigateCarousel = (direction: 'prev' | 'next') => {
-    if (!displayPhotos || !displayPhotos.length) return;
+    const carouselPhotos = isAuthenticated ? featuredPhotos : displayPhotos;
+    if (!carouselPhotos || !carouselPhotos.length) return;
 
     if (direction === 'prev') {
       setFeaturedPhotoIndex(prev => 
-        prev === 0 ? displayPhotos.length - 1 : prev - 1
+        prev === 0 ? carouselPhotos.length - 1 : prev - 1
       );
     } else {
       setFeaturedPhotoIndex(prev => 
-        prev === displayPhotos.length - 1 ? 0 : prev + 1
+        prev === carouselPhotos.length - 1 ? 0 : prev + 1
       );
     }
   };
@@ -131,7 +156,7 @@ const Gallery = ({ selectedCategory, onPhotoClick, setVisiblePhotos }: GalleryPr
               transition={{ duration: 0.3 }}
             >
               {/* Full width featured carousel for the homepage */}
-              {selectedCategory === "all" && displayPhotos.length > 0 && (
+              {selectedCategory === "all" && (isAuthenticated ? featuredPhotos.length > 0 : displayPhotos.length > 0) && (
                 <div className="relative mb-16 rounded-lg overflow-hidden shadow-lg">
                   <div className="w-full aspect-[16/9] relative">
                     <AnimatePresence mode="wait">
@@ -144,15 +169,15 @@ const Gallery = ({ selectedCategory, onPhotoClick, setVisiblePhotos }: GalleryPr
                         className="absolute inset-0"
                       >
                         <img
-                          src={displayPhotos[featuredPhotoIndex]?.imageUrl}
-                          alt={displayPhotos[featuredPhotoIndex]?.title}
+                          src={(isAuthenticated ? featuredPhotos : displayPhotos)[featuredPhotoIndex]?.imageUrl}
+                          alt={(isAuthenticated ? featuredPhotos : displayPhotos)[featuredPhotoIndex]?.title}
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
                           <div className="p-6 md:p-8 text-white w-full">
                             <div className="flex flex-wrap items-baseline gap-x-2">
                               <h3 className="font-light text-xl md:text-2xl tracking-wide">
-                                {displayPhotos[featuredPhotoIndex]?.title}
+                                {(isAuthenticated ? featuredPhotos : displayPhotos)[featuredPhotoIndex]?.title}
                               </h3>
                               {displayPhotos[featuredPhotoIndex]?.photographer && (
                                 <span className="text-sm text-white/80 normal-case">
