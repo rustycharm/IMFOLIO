@@ -14,7 +14,7 @@ export default function HeroImageManager() {
 
   // Fetch available global hero images
   const { data: heroImages = [], isLoading: heroLoading } = useQuery<any[]>({
-    queryKey: ['/api/admin/hero-images'],
+    queryKey: ['/api/hero-images'],
   });
 
   // Fetch user's current hero selection
