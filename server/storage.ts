@@ -55,7 +55,7 @@ export interface IStorage {
 
   // Hero image operations
   getAllHeroImages(): Promise<HeroImage[]>;
-  getHeroImageById(id: string | number): Promise<HeroImage | undefined>;
+  getHeroImageById(heroImageId: string): Promise<HeroImage | undefined>;
   createHeroImage(data: any): Promise<HeroImage>;
   setDefaultHeroImage(heroId: string): Promise<void>;
 
@@ -438,14 +438,14 @@ export class DatabaseStorage implements IStorage {
     return result.rows[0] as UserHeroSelection | undefined;
   }
 
-  async getHeroImageById(heroImageId: string): Promise<HeroImage | null> {
+  async getHeroImageById(heroImageId: string): Promise<HeroImage | undefined> {
     console.log('🔍 getHeroImageById called with ID:', heroImageId);
     const [heroImage] = await db
       .select()
       .from(heroImages)
       .where(eq(heroImages.id, heroImageId));
     console.log('🔍 getHeroImageById result:', heroImage);
-    return heroImage;
+    return heroImage || undefined;
   }
 
   async updateHeroImageColors(heroImageId: string, colorData: {
