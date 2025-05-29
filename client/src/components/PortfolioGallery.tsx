@@ -199,9 +199,20 @@ const PortfolioGallery = ({
                         className="w-full h-auto object-cover aspect-[4/3] sm:aspect-auto"
                         loading="lazy"
                       />
+                      {/* Featured badge */}
+                      {photo.featured && (
+                        <div className="absolute top-3 left-3 bg-yellow-500 text-black px-2 py-1 text-xs font-medium rounded shadow-lg z-10">
+                          FEATURED
+                        </div>
+                      )}
                       <div className="overlay absolute inset-0 bg-black bg-opacity-20 sm:bg-opacity-0 sm:hover:bg-opacity-40 transition-all flex items-end opacity-100 sm:opacity-0 sm:hover:opacity-100">
                         <div className="p-3 sm:p-5 text-white w-full">
-                          <h3 className="font-light tracking-wide text-base sm:text-lg">{photo.title}</h3>
+                          <div className="flex items-baseline gap-2">
+                            <h3 className="font-light tracking-wide text-base sm:text-lg">{photo.title}</h3>
+                            {photo.featured && (
+                              <span className="text-yellow-300 text-xs font-medium">★</span>
+                            )}
+                          </div>
                           <p className="text-xs uppercase tracking-widest mt-1 text-white/80">
                             {photo.category}
                           </p>
