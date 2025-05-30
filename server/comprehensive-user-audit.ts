@@ -66,11 +66,10 @@ function isUserFile(key: string, userId: string): boolean {
     `${userId}/`,                 // User folder
     `/hero/${userId}/`,           // Hero images
     `/${userId}/`,                // User in subdirectory
-    `43075889`,                   // Direct user ID match for specific case
+    userId,                       // Direct user ID match
   ];
   
-  return patterns.some(pattern => key.includes(pattern)) || 
-         key.includes(userId);
+  return patterns.some(pattern => key.includes(pattern));
 }
 
 function extractStorageKeyFromUrl(imageUrl: string): string {
@@ -127,10 +126,15 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
     console.log('💾 Step 2: Querying storage_usage table...');
     let storageUsageRecords: any[] = [];
     try {
-      storageUsageRecords = await db
-        .select()
-        .from(storageUsage)
-        .where(eq(storageUsage.userId, userId));
+      const hasUserIdColumn = await db.select().from(storageUsage).limit(1).catch(() => null);
+      if (hasUserIdColumn) {
+        storageUsageRecords = await db
+          .select()
+          .from(storageUsage)
+          .where(eq(storageUsage.userId, parseInt(userId)));
+      } else {
+        console.warn('⚠️ storage_usage table does not have userId column');
+      }
     } catch (error) {
       console.warn(`⚠️ Could not query storage_usage table: ${error}`);
       storageUsageRecords = [];
@@ -143,7 +147,7 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
     const photoRecords = await db
       .select()
       .from(photos)
-      .where(eq(photos.userId, userId));
+      .where(eq(photos.userId, parseInt(userId)));
     
     console.log(`   Found ${photoRecords.length} records in photos table`);
     
