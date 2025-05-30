@@ -1323,6 +1323,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`📊 Found ${dbPhotos.length} photos in database for user ${userId}`);
       
+      // Debug: Log sample database entries to understand the structure
+      if (dbPhotos.length > 0) {
+        console.log(`🔍 Sample database photo entry:`, JSON.stringify(dbPhotos[0], null, 2));
+      }
+      
       // Focus only on photo storage (excluding profile pictures for cleaner audit)
       const userPrefix = `photo/${userId}/`;
       let allFiles: any[] = [];
@@ -1359,9 +1364,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
               
               // Check if this file has a corresponding database entry
-              const fileUrl = `/images/${fileName}`;
-              const dbEntry = dbPhotos.find(photo => photo.imageUrl === fileUrl);
-              const hasDbEntry = !!dbEntry;
+              // Try multiple matching patterns for robust cross-reference
+              let dbEntry = null;
+              let hasDbEntry = false;
+              
+              // Pattern 1: Direct filename match (/images/filename.jpg)
+              const fileUrl1 = `/images/${fileName}`;
+              dbEntry = dbPhotos.find(photo => photo.imageUrl === fileUrl1);
+              
+              // Pattern 2: Full path match (/images/photo/userId/year/month/filename.jpg)
+              if (!dbEntry) {
+                const fileUrl2 = `/images/${fileKey}`;
+                dbEntry = dbPhotos.find(photo => photo.imageUrl === fileUrl2);
+              }
+              
+              // Pattern 3: Check if database entry contains the filename
+              if (!dbEntry) {
+                dbEntry = dbPhotos.find(photo => 
+                  photo.imageUrl && photo.imageUrl.includes(fileName)
+                );
+              }
+              
+              // Pattern 4: Extract base filename and match
+              if (!dbEntry) {
+                const baseFileName = fileName.replace(/^\d{13}-/, ''); // Remove timestamp prefix
+                dbEntry = dbPhotos.find(photo => 
+                  photo.imageUrl && photo.imageUrl.includes(baseFileName)
+                );
+              }
+              
+              hasDbEntry = !!dbEntry;
+              
+              console.log(`🔍 File: ${fileName}, DB Match: ${hasDbEntry ? 'YES' : 'NO'}${dbEntry ? ` (${dbEntry.imageUrl})` : ''}`);
               
               return {
                 key: fileKey,
@@ -1390,10 +1424,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // Calculate cross-reference summary
+      const filesInDb = allFiles.filter(file => file.hasDbEntry).length;
+      const orphanedFiles = allFiles.filter(file => !file.hasDbEntry).length;
+      
+      console.log(`📊 Cross-reference summary for user ${userId}:`);
+      console.log(`   Total files in storage: ${allFiles.length}`);
+      console.log(`   Files with DB entries: ${filesInDb}`);
+      console.log(`   Orphaned files: ${orphanedFiles}`);
+      
       res.json({
         userId,
         userPrefix: userPrefix,
         totalFiles: allFiles.length,
+        filesInDatabase: filesInDb,
+        orphanedFiles: orphanedFiles,
         files: allFiles.sort((a: any, b: any) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
       });
     } catch (error) {
