@@ -1450,6 +1450,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin route to restore orphaned file to database
+  app.post("/api/admin/object-storage/restore-file", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { userId, fileKey, fileName, fileSize, fileType } = req.body;
+      
+      // Validate required fields
+      if (!userId || !fileKey || !fileName) {
+        return res.status(400).json({ 
+          message: "Missing required fields: userId, fileKey, fileName" 
+        });
+      }
+      
+      console.log(`🔧 Attempting to restore orphaned file to database: ${fileName} for user ${userId}`);
+      
+      // Generate imageUrl based on filename only (matching existing pattern)
+      const imageUrl = `/images/${fileName}`;
+      
+      // Check if this imageUrl already exists to prevent duplicates
+      const existingPhoto = await storage.getPhotosByUser(userId);
+      const duplicate = existingPhoto.find(photo => photo.imageUrl === imageUrl);
+      
+      if (duplicate) {
+        return res.status(409).json({ 
+          message: "Database entry already exists for this file",
+          existingEntry: {
+            id: duplicate.id,
+            title: duplicate.title,
+            imageUrl: duplicate.imageUrl
+          }
+        });
+      }
+      
+      // Extract timestamp from filename for creation date if possible
+      let uploadDate = new Date();
+      const timestampMatch = fileName.match(/^(\d{13})-/);
+      if (timestampMatch) {
+        uploadDate = new Date(parseInt(timestampMatch[1]));
+      }
+      
+      // Generate a meaningful title from filename
+      let title = fileName;
+      // Remove timestamp prefix and file extension
+      title = title.replace(/^\d{13}-/, '').replace(/\.[^/.]+$/, '');
+      // Replace common separators with spaces and capitalize
+      title = title.replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      
+      // Create new photo entry
+      const newPhoto = await storage.createPhoto({
+        userId,
+        title,
+        imageUrl,
+        isPublic: false, // Default to private for safety
+        featured: false, // Default not featured
+        uploadedAt: uploadDate
+      });
+      
+      console.log(`✅ Successfully restored file to database:`, {
+        id: newPhoto.id,
+        title: newPhoto.title,
+        imageUrl: newPhoto.imageUrl,
+        userId: newPhoto.userId
+      });
+      
+      res.json({
+        success: true,
+        message: "File successfully added to database",
+        photo: {
+          id: newPhoto.id,
+          title: newPhoto.title,
+          imageUrl: newPhoto.imageUrl,
+          isPublic: newPhoto.isPublic,
+          featured: newPhoto.featured,
+          uploadedAt: newPhoto.uploadedAt
+        }
+      });
+      
+    } catch (error) {
+      console.error("Error restoring orphaned file:", error);
+      res.status(500).json({ 
+        message: "Failed to restore file to database",
+        error: (error as Error).message || 'Unknown error'
+      });
+    }
+  });
+
+  // Admin route to delete file from object storage
+  app.delete("/api/admin/object-storage/delete-file", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { userId, fileKey, fileName } = req.body;
+      
+      // Validate required fields
+      if (!userId || !fileKey || !fileName) {
+        return res.status(400).json({ 
+          message: "Missing required fields: userId, fileKey, fileName" 
+        });
+      }
+      
+      console.log(`🗑️ Attempting to delete file from object storage: ${fileName} for user ${userId}`);
+      
+      const { Client } = await import('@replit/object-storage');
+      const client = new Client();
+      
+      // Delete the file from object storage
+      await client.delete(fileKey);
+      
+      console.log(`✅ Successfully deleted file from object storage: ${fileName}`);
+      
+      res.json({
+        success: true,
+        message: "File successfully deleted from object storage",
+        deletedFile: {
+          fileKey,
+          fileName,
+          userId
+        }
+      });
+      
+    } catch (error) {
+      console.error("Error deleting file from object storage:", error);
+      res.status(500).json({ 
+        message: "Failed to delete file from object storage",
+        error: (error as Error).message || 'Unknown error'
+      });
+    }
+  });
+
   // Route to serve files from object storage
   app.get("/api/storage/file/*", async (req, res) => {
     try {

@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, Image, File, Download, ExternalLink, Clock, HardDrive } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { User, Image, File, Download, ExternalLink, Clock, HardDrive, Plus, Trash2 } from "lucide-react";
 
 interface StorageFile {
   key: string;
@@ -39,6 +40,8 @@ interface User {
 
 export function ObjectStorageBrowser() {
   const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch all users for selection
   const { data: users, isLoading: usersLoading } = useQuery({
@@ -51,6 +54,80 @@ export function ObjectStorageBrowser() {
     queryKey: [`/api/admin/object-storage/user/${selectedUserId}`],
     enabled: !!selectedUserId,
   }) as { data: UserStorageData | undefined, isLoading: boolean, error: any };
+
+  // Mutation for restoring orphaned files to database
+  const restoreFileMutation = useMutation({
+    mutationFn: async (fileData: { userId: string; fileKey: string; fileName: string; fileSize: number; fileType: string }) => {
+      return apiRequest("/api/admin/object-storage/restore-file", {
+        method: "POST",
+        body: JSON.stringify(fileData),
+        headers: { "Content-Type": "application/json" }
+      });
+    },
+    onSuccess: (data, variables) => {
+      toast({
+        title: "File Restored",
+        description: `Successfully added "${variables.fileName}" to database`,
+      });
+      // Invalidate and refetch user storage data
+      queryClient.invalidateQueries({ queryKey: [`/api/admin/object-storage/user/${selectedUserId}`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Restore Failed",
+        description: error.message || "Failed to restore file to database",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Mutation for deleting files from object storage
+  const deleteFileMutation = useMutation({
+    mutationFn: async (fileData: { userId: string; fileKey: string; fileName: string }) => {
+      return apiRequest("/api/admin/object-storage/delete-file", {
+        method: "DELETE",
+        body: JSON.stringify(fileData),
+        headers: { "Content-Type": "application/json" }
+      });
+    },
+    onSuccess: (data, variables) => {
+      toast({
+        title: "File Deleted",
+        description: `Successfully deleted "${variables.fileName}" from storage`,
+      });
+      // Invalidate and refetch user storage data
+      queryClient.invalidateQueries({ queryKey: [`/api/admin/object-storage/user/${selectedUserId}`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete file from storage",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleRestoreFile = (file: StorageFile) => {
+    const fileName = file.key.split('/').pop() || file.key;
+    restoreFileMutation.mutate({
+      userId: selectedUserId,
+      fileKey: file.key,
+      fileName,
+      fileSize: file.size || 0,
+      fileType: file.type
+    });
+  };
+
+  const handleDeleteFile = (file: StorageFile) => {
+    if (confirm(`Are you sure you want to permanently delete "${file.key.split('/').pop()}" from object storage? This action cannot be undone.`)) {
+      const fileName = file.key.split('/').pop() || file.key;
+      deleteFileMutation.mutate({
+        userId: selectedUserId,
+        fileKey: file.key,
+        fileName
+      });
+    }
+  };
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 B';
@@ -283,6 +360,28 @@ export function ObjectStorageBrowser() {
 
                       {/* Actions */}
                       <div className="flex items-center gap-2">
+                        {!file.hasDbEntry && (
+                          <>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleRestoreFile(file)}
+                              disabled={restoreFileMutation.isPending}
+                              className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleDeleteFile(file)}
+                              disabled={deleteFileMutation.isPending}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
                         <Button 
                           size="sm" 
                           variant="outline"
