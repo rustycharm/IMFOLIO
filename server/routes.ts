@@ -1336,12 +1336,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             // Process files with actual file data from object storage
             const prefixFiles = listResult.value.map((file: any) => {
-              const fileName = file.name || '';
+              const fileName = file.name;
               const fileKey = `${userPrefix}${fileName}`;
               
               // Use actual file data from object storage
-              const actualSize = file.size || 0;
-              const actualLastModified = file.lastModified || new Date().toISOString();
+              const actualSize = file.size;
+              const actualLastModified = file.lastModified;
               
               // Check if this file has a corresponding database entry
               const fileUrl = `/images/${fileName}`;
