@@ -32,7 +32,7 @@ const PortfolioGallery = ({
     // Filter by category first
     let filteredPhotos = photos;
     if (selectedCategory !== "all") {
-      filteredPhotos = photos.filter(photo => photo.category === selectedCategory);
+      filteredPhotos = photos.filter(photo => photo.category && photo.category === selectedCategory);
     }
     
     // Separate featured and regular photos

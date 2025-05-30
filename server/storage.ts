@@ -117,7 +117,8 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (filters?.category && filters.category !== 'all') {
-      conditions.push(eq(photos.category, filters.category));
+      // Only include photos that have a category AND match the requested category
+      conditions.push(sql`${photos.category} IS NOT NULL AND ${photos.category} = ${filters.category}`);
     }
 
     return await db.select().from(photos).where(and(...conditions));

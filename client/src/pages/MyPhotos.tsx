@@ -87,7 +87,8 @@ export default function MyPhotos() {
   // Filter photos based on selected category, search query, and privacy state
   const filteredPhotos = Array.isArray(photos) 
     ? photos.filter(photo => {
-        const matchesCategory = selectedCategory === "all" || photo.category === selectedCategory;
+        const matchesCategory = selectedCategory === "all" || 
+          (photo.category && photo.category === selectedCategory);
         const matchesSearch = !searchQuery || 
           (photo.title && photo.title.toLowerCase().includes(searchQuery.toLowerCase())) || 
           (photo.description && photo.description.toLowerCase().includes(searchQuery.toLowerCase()));
