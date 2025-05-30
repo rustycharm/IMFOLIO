@@ -13,6 +13,13 @@ interface StorageFile {
   lastModified: string;
   url: string;
   type: string;
+  hasDbEntry: boolean;
+  dbInfo?: {
+    id: number;
+    title: string;
+    isPublic: boolean;
+    isFeatured: boolean;
+  } | null;
 }
 
 interface UserStorageData {
@@ -229,6 +236,28 @@ export function ObjectStorageBrowser() {
                           <Badge variant="outline" className="text-xs">
                             {file.type}
                           </Badge>
+                        </div>
+                        
+                        {/* Database Status */}
+                        <div className="flex items-center gap-2 mt-2">
+                          {file.hasDbEntry ? (
+                            <>
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <span className="text-xs text-green-600 font-medium">In Database</span>
+                              {file.dbInfo && (
+                                <span className="text-xs text-gray-500">
+                                  ID: {file.dbInfo.id} | {file.dbInfo.isPublic ? 'Public' : 'Private'}
+                                  {file.dbInfo.isFeatured ? ' | Featured' : ''}
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                              <span className="text-xs text-red-600 font-medium">Orphaned File</span>
+                              <span className="text-xs text-gray-500">No database entry</span>
+                            </>
+                          )}
                         </div>
                       </div>
 

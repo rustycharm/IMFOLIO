@@ -1318,6 +1318,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🔍 Browsing object storage for user ${userId}`);
       
+      // Get all database photo entries for this user for cross-reference
+      const dbPhotos = await storage.getPhotosByUser(parseInt(userId));
+      
+      console.log(`📊 Found ${dbPhotos.length} photos in database for user ${userId}`);
+      
       // Try both possible prefixes for user files (photos are primarily in photo/ path)
       const possiblePrefixes = [`photo/${userId}/`, `profile/${userId}/`];
       let allFiles: any[] = [];
@@ -1329,7 +1334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (listResult.ok && listResult.value) {
             console.log(`📁 Found ${listResult.value.length} files in ${userPrefix}`);
             
-            // Process files with intelligent size estimation (bypassing database completely)
+            // Process files with intelligent size estimation and database cross-reference
             const prefixFiles = listResult.value.map((file: any) => {
               const fileName = file.name || '';
               
@@ -1350,16 +1355,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 estimatedSize = 900000; // 900KB for JPEG
               }
               
+              // Check if this file has a corresponding database entry
+              const fileUrl = `/images/${fileName}`;
+              const dbEntry = dbPhotos.find(photo => photo.imageUrl === fileUrl);
+              const hasDbEntry = !!dbEntry;
+              
               return {
                 key: fileName,
                 size: estimatedSize,
                 lastModified: timestamp.toISOString(),
-                url: `/images/${fileName}`,
+                url: fileUrl,
                 type: fileName.toLowerCase().includes('.jpg') || fileName.toLowerCase().includes('.jpeg') ? 'image/jpeg' :
                       fileName.toLowerCase().includes('.png') ? 'image/png' :
                       fileName.toLowerCase().includes('.webp') ? 'image/webp' : 
                       fileName.toLowerCase().includes('.gif') ? 'image/gif' : 'unknown',
-                prefix: userPrefix
+                prefix: userPrefix,
+                hasDbEntry,
+                dbInfo: dbEntry ? {
+                  id: dbEntry.id,
+                  title: dbEntry.title,
+                  isPublic: dbEntry.isPublic,
+                  isFeatured: dbEntry.isFeatured
+                } : null
               };
             });
             
