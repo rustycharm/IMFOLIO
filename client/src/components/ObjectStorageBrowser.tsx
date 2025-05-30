@@ -181,12 +181,10 @@ export function ObjectStorageBrowser() {
                     <div className="text-sm text-gray-600">Total Files</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">
-                      {userStorage?.files ? formatFileSize(
-                        userStorage.files.reduce((total: number, file: StorageFile) => total + file.size, 0)
-                      ) : '0 B'}
+                    <div className="text-2xl font-bold text-gray-400">
+                      N/A
                     </div>
-                    <div className="text-sm text-gray-600">Total Size</div>
+                    <div className="text-sm text-gray-600">Size (Not Available)</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold">
@@ -240,14 +238,11 @@ export function ObjectStorageBrowser() {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-sm truncate">{file.key}</h3>
                         <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                          <span>{formatFileSize(file.size)}</span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {formatDate(file.lastModified)}
-                          </span>
                           <Badge variant="outline" className="text-xs">
                             {file.type}
                           </Badge>
+                          <span className="text-gray-400">Size: Not Available</span>
+                          <span className="text-gray-400">Modified: Not Available</span>
                         </div>
                         
                         {/* Database Status */}

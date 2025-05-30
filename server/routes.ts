@@ -1337,12 +1337,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             // Process files with data directly from the list response
             const prefixFiles = listResult.value.map((file: any) => {
-              const fileName = file.key.split('/').pop() || file.key;
-              const fileKey = file.key;
+              const fileName = file.name.split('/').pop() || file.name;
+              const fileKey = file.name;
               
-              // Use file data from the list response
-              const actualSize = file.size;
-              const actualLastModified = file.lastModified;
+              // The storage API only provides the name, no size or timestamp data available
+              const actualSize = null; // No size data available from storage API
+              const actualLastModified = null; // No timestamp data available from storage API
               
               // Check if this file has a corresponding database entry
               const fileUrl = `/images/${fileName}`;
