@@ -9,7 +9,7 @@ import { User, Image, File, Download, ExternalLink, Clock, HardDrive } from "luc
 
 interface StorageFile {
   key: string;
-  size: number;
+  size: number | null;
   lastModified: string;
   url: string;
   type: string;
@@ -184,7 +184,7 @@ export function ObjectStorageBrowser() {
                     <div className="text-2xl font-bold">
                       {userStorage?.files ? formatFileSize(
                         userStorage.files.reduce((total: number, file: StorageFile) => {
-                          return total + (file.size || 0);
+                          return total + (typeof file.size === 'number' ? file.size : 0);
                         }, 0)
                       ) : '0 B'}
                     </div>
@@ -242,10 +242,12 @@ export function ObjectStorageBrowser() {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-sm truncate">{file.key}</h3>
                         <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                          {file.size && (
+                          {typeof file.size === 'number' ? (
                             <span>{formatFileSize(file.size)}</span>
+                          ) : (
+                            <span className="text-yellow-600">Size calculating...</span>
                           )}
-                          {file.lastModified && (
+                          {file.lastModified && file.lastModified !== 'Unknown' && (
                             <span className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
                               {formatDate(file.lastModified)}

@@ -1450,6 +1450,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route to serve files from object storage
+  app.get("/api/storage/file/*", async (req, res) => {
+    try {
+      const fileKey = req.params[0]; // Get the full path after /api/storage/file/
+      const { Client } = await import('@replit/object-storage');
+      const client = new Client();
+      
+      // Download the file from object storage
+      const downloadResult = await client.downloadAsBytes(decodeURIComponent(fileKey));
+      
+      if (!downloadResult.ok) {
+        return res.status(404).json({ message: "File not found" });
+      }
+      
+      const buffer = downloadResult.value[0];
+      
+      // Set appropriate content type based on file extension
+      const fileName = fileKey.split('/').pop() || '';
+      const fileExt = fileName.toLowerCase();
+      
+      let contentType = 'application/octet-stream';
+      if (fileExt.includes('.jpg') || fileExt.includes('.jpeg')) {
+        contentType = 'image/jpeg';
+      } else if (fileExt.includes('.png')) {
+        contentType = 'image/png';
+      } else if (fileExt.includes('.webp')) {
+        contentType = 'image/webp';
+      } else if (fileExt.includes('.gif')) {
+        contentType = 'image/gif';
+      }
+      
+      res.set({
+        'Content-Type': contentType,
+        'Content-Length': buffer.length.toString(),
+        'Cache-Control': 'public, max-age=31536000', // Cache for 1 year
+      });
+      
+      res.send(buffer);
+    } catch (error) {
+      console.error(`Error serving file ${req.params[0]}:`, error);
+      res.status(500).json({ message: "Failed to serve file" });
+    }
+  });
+
   // Admin route to get storage audit with real metrics
   app.get("/api/admin/storage/audit", async (req, res) => {
     try {
