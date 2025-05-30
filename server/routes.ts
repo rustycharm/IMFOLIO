@@ -1323,11 +1323,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`📊 Found ${dbPhotos.length} photos in database for user ${userId}`);
       
-      // Try both possible prefixes for user files (photos are primarily in photo/ path)
-      const possiblePrefixes = [`photo/${userId}/`, `profile/${userId}/`];
+      // Focus only on photo storage (excluding profile pictures for cleaner audit)
+      const userPrefix = `photo/${userId}/`;
       let allFiles: any[] = [];
       
-      for (const userPrefix of possiblePrefixes) {
+      {
         try {
           const listResult = await client.list({ prefix: userPrefix });
           
@@ -1389,7 +1389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         userId,
-        userPrefix: possiblePrefixes.join(', '),
+        userPrefix: userPrefix,
         totalFiles: allFiles.length,
         files: allFiles.sort((a: any, b: any) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
       });

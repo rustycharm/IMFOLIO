@@ -128,7 +128,7 @@ export function ObjectStorageBrowser() {
                       : selectedUser.email}
                   </h3>
                   <p className="text-sm text-gray-600">User ID: {selectedUser.id}</p>
-                  <p className="text-sm text-gray-600">Storage Path: photo/{selectedUser.id}/</p>
+                  <p className="text-sm text-gray-600">Photo Storage: photo/{selectedUser.id}/</p>
                 </div>
                 <Badge variant={selectedUser.role === 'admin' ? 'destructive' : 'secondary'}>
                   {selectedUser.role}
