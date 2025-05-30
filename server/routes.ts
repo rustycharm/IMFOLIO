@@ -1535,6 +1535,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Special endpoint for serving restored images that need path resolution
+  app.get("/api/images/restored/:filename", async (req, res) => {
+    try {
+      const { filename } = req.params;
+      
+      if (!filename) {
+        return res.status(400).json({ error: 'Filename required' });
+      }
+
+      const { RestoredImageResolver } = await import('./restored-image-resolver');
+      const resolver = RestoredImageResolver.getInstance();
+      
+      const imageUrl = `/images/${filename}`;
+      const imageBuffer = await resolver.getImage(imageUrl);
+      
+      if (!imageBuffer) {
+        return res.status(404).json({ error: 'Image not found' });
+      }
+
+      // Determine content type from filename
+      const ext = filename.toLowerCase().split('.').pop();
+      let contentType = 'image/jpeg';
+      if (ext === 'png') contentType = 'image/png';
+      else if (ext === 'webp') contentType = 'image/webp';
+      else if (ext === 'gif') contentType = 'image/gif';
+
+      res.set({
+        'Content-Type': contentType,
+        'Content-Length': imageBuffer.length.toString(),
+        'Cache-Control': 'public, max-age=86400',
+        'X-Served-By': 'restored-image-resolver'
+      });
+
+      res.send(imageBuffer);
+    } catch (error) {
+      console.error('Error serving restored image:', error);
+      res.status(500).json({ error: 'Failed to serve image' });
+    }
+  });
+
   // Admin route to delete file from object storage
   app.delete("/api/admin/object-storage/delete-file", isAuthenticated, isAdmin, async (req, res) => {
     try {

@@ -105,34 +105,14 @@ export async function serveImage(req: Request, res: Response) {
     
     // Decode and sanitize the path
     let decodedPath = decodeURIComponent(path).replace(/\.\./g, ''); // Prevent directory traversal
-    let actualStoragePath = decodedPath;
     
-    // Handle path mapping for different types of images
-    const client = proxyManager.getClient();
+    // Handle path mapping for hero images stored in object storage
+    // Keep the full path since images are stored as "global/hero-images/..." in object storage
     
-    if (decodedPath.includes('global/hero-images/')) {
-      // Hero images - keep the full path
-      actualStoragePath = decodedPath;
-    } else if (decodedPath.match(/^\d{13}-[a-z0-9]+-.*\.(jpg|jpeg|png|webp|gif)$/i)) {
-      // User photo with timestamp filename - need to find the full path
-      const photoSearchResult = await client.list({ prefix: 'photo/' });
-      const foundFile = photoSearchResult.ok ? photoSearchResult.value.find((obj: any) => 
-        obj.key && obj.key.includes(decodedPath)
-      ) : null;
-      
-      if (foundFile) {
-        actualStoragePath = foundFile.key;
-        console.log(`🔍 Image proxy: Mapped "${path}" → found at "${actualStoragePath}"`);
-      } else {
-        console.log(`❌ Image not found in storage: ${decodedPath}`);
-        return res.status(404).json({ error: 'Image not found' });
-      }
-    }
-    
-    console.log(`🔍 Image proxy: Requesting path "${path}" → mapped to "${actualStoragePath}"`);
+    console.log(`🔍 Image proxy: Requesting path "${path}" → mapped to "${decodedPath}"`);
     
     // Check cache first for small images
-    const cacheKey = actualStoragePath;
+    const cacheKey = decodedPath;
     const cached = imageCache.get(cacheKey);
     
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
@@ -144,20 +124,22 @@ export async function serveImage(req: Request, res: Response) {
         'ETag': `"${cacheKey}-${cached.timestamp}"`,
       });
       
-      console.log(`⚡ Cache hit for ${actualStoragePath} (${cached.size} bytes) - ${Date.now() - startTime}ms`);
+      console.log(`⚡ Cache hit for ${decodedPath} (${cached.size} bytes) - ${Date.now() - startTime}ms`);
       return res.send(cached.data);
     }
     
+    const client = proxyManager.getClient();
+    
     // Check if the file exists
-    const exists = await client.exists(actualStoragePath);
+    const exists = await client.exists(decodedPath);
     if (!exists.ok || !exists.value) {
-      console.log(`❌ Image not found: ${actualStoragePath}`);
+      console.log(`❌ Image not found: ${decodedPath}`);
       return res.status(404).json({ error: 'Image not found' });
     }
     
     // Download the image from object storage
-    console.log(`📥 Downloading image: ${actualStoragePath}`);
-    const result = await client.downloadAsBytes(actualStoragePath);
+    console.log(`📥 Downloading image: ${decodedPath}`);
+    const result = await client.downloadAsBytes(decodedPath);
     if (!result.ok) {
       throw new Error('Failed to download image from storage');
     }
