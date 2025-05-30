@@ -1333,13 +1333,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           if (listResult.ok && listResult.value) {
             console.log(`📁 Found ${listResult.value.length} files in ${userPrefix}`);
+            console.log(`🔍 First file structure:`, JSON.stringify(listResult.value[0], null, 2));
             
-            // Process files with actual file data from object storage
+            // Process files with data directly from the list response
             const prefixFiles = listResult.value.map((file: any) => {
-              const fileName = file.name;
-              const fileKey = `${userPrefix}${fileName}`;
+              const fileName = file.key.split('/').pop() || file.key;
+              const fileKey = file.key;
               
-              // Use actual file data from object storage
+              // Use file data from the list response
               const actualSize = file.size;
               const actualLastModified = file.lastModified;
               
