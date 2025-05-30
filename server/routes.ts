@@ -1464,8 +1464,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🔧 Attempting to restore orphaned file to database: ${fileName} for user ${userId}`);
       
-      // Generate imageUrl to match the actual file location in object storage
-      const imageUrl = `/images/${fileKey}`;
+      // Generate imageUrl to match the upload system pattern (just filename)
+      const imageUrl = `/images/${fileName}`;
       
       // Check if this imageUrl already exists to prevent duplicates
       const existingPhoto = await storage.getPhotosByUser(userId);
