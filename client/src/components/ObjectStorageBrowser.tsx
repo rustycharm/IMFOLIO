@@ -154,7 +154,10 @@ export function ObjectStorageBrowser() {
             ) : storageError ? (
               <div className="text-center py-8">
                 <p className="text-red-600">Failed to load storage contents</p>
-                <p className="text-sm text-gray-500 mt-2">{storageError.message}</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  {typeof storageError === 'string' ? storageError : 
+                   storageError?.message || 'Unknown error occurred'}
+                </p>
               </div>
             ) : userStorage?.files.length === 0 ? (
               <div className="text-center py-8">

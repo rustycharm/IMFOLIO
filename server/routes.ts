@@ -1318,35 +1318,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🔍 Browsing object storage for user ${userId}`);
       
-      // List all files with user's prefix
-      const userPrefix = `profile/${userId}/`;
-      const listResult = await client.list({ prefix: userPrefix });
+      // Try both possible prefixes for user files
+      const possiblePrefixes = [`profile/${userId}/`, `photo/${userId}/`];
+      let allFiles: any[] = [];
       
-      if (!listResult.ok) {
-        throw new Error('Failed to list files from object storage');
+      for (const userPrefix of possiblePrefixes) {
+        try {
+          const listResult = await client.list({ prefix: userPrefix });
+          
+          if (listResult.ok && listResult.value) {
+            const prefixFiles = listResult.value.map((file: any) => ({
+              key: file.key || '',
+              size: file.size || 0,
+              lastModified: file.lastModified || new Date().toISOString(),
+              url: `/images/${file.key || ''}`,
+              type: (file.key || '').toLowerCase().includes('.jpg') || (file.key || '').toLowerCase().includes('.jpeg') ? 'image/jpeg' :
+                    (file.key || '').toLowerCase().includes('.png') ? 'image/png' :
+                    (file.key || '').toLowerCase().includes('.webp') ? 'image/webp' : 'unknown',
+              prefix: userPrefix
+            }));
+            allFiles = allFiles.concat(prefixFiles);
+          }
+        } catch (prefixError) {
+          console.log(`No files found with prefix ${userPrefix} for user ${userId}`);
+        }
       }
-      
-      const files = listResult.value.map((file: any) => ({
-        key: file.key || '',
-        size: file.size || 0,
-        lastModified: file.lastModified || new Date().toISOString(),
-        url: `/images/${file.key || ''}`,
-        type: (file.key || '').toLowerCase().includes('.jpg') || (file.key || '').toLowerCase().includes('.jpeg') ? 'image/jpeg' :
-              (file.key || '').toLowerCase().includes('.png') ? 'image/png' :
-              (file.key || '').toLowerCase().includes('.webp') ? 'image/webp' : 'unknown'
-      }));
       
       res.json({
         userId,
-        userPrefix,
-        totalFiles: files.length,
-        files: files.sort((a: any, b: any) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
+        userPrefix: possiblePrefixes.join(', '),
+        totalFiles: allFiles.length,
+        files: allFiles.sort((a: any, b: any) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
       });
     } catch (error) {
       console.error(`Error browsing object storage for user ${req.params.userId}:`, error);
       res.status(500).json({ 
         message: "Failed to browse user files",
-        error: error.message 
+        error: (error as Error).message || 'Unknown error'
       });
     }
   });
