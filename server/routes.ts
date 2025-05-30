@@ -1560,7 +1560,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log(`🔧 Successfully got image buffer, size: ${imageBuffer.length} bytes`);
-    }
 
       // Determine content type from filename
       const ext = filename.toLowerCase().split('.').pop();

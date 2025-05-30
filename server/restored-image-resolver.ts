@@ -70,6 +70,12 @@ export class RestoredImageResolver {
             .map((obj: any) => obj.key)
             .slice(0, 10); // Show first 10 files
           console.log(`📋 Sample files in storage:`, availableFiles);
+          
+          // Also check what properties the objects actually have
+          if (result.value.length > 0) {
+            console.log(`📋 First object properties:`, Object.keys(result.value[0]));
+            console.log(`📋 First object:`, result.value[0]);
+          }
         }
       } else {
         console.log(`❌ Failed to list files from object storage:`, result.error);
