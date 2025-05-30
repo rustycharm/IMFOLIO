@@ -41,7 +41,7 @@ export function ObjectStorageBrowser() {
 
   // Fetch storage data for selected user
   const { data: userStorage, isLoading: storageLoading, error: storageError } = useQuery({
-    queryKey: ["/api/admin/object-storage/user", selectedUserId],
+    queryKey: [`/api/admin/object-storage/user/${selectedUserId}`],
     enabled: !!selectedUserId,
   }) as { data: UserStorageData | undefined, isLoading: boolean, error: any };
 
