@@ -58,6 +58,39 @@ interface ComprehensiveAuditResult {
   recommendations: string[];
 }
 
+function isUserFile(key: string, userId: string): boolean {
+  // More precise filtering for user files
+  const patterns = [
+    `photo/${userId}/`,           // Direct photo path
+    `profile/${userId}/`,         // Profile image path
+    `${userId}/`,                 // User folder
+    `/hero/${userId}/`,           // Hero images
+    `/${userId}/`,                // User in subdirectory
+  ];
+  
+  return patterns.some(pattern => key.includes(pattern));
+}
+
+function extractStorageKeyFromUrl(imageUrl: string): string {
+  if (!imageUrl) return '';
+  
+  // Remove the /images/ prefix if present
+  let key = imageUrl.replace(/^\/images\//, '');
+  
+  // Handle full URLs
+  if (key.startsWith('http')) {
+    const url = new URL(key);
+    key = url.pathname.replace(/^\/images\//, '');
+  }
+  
+  return key;
+}
+
+function normalizeKey(key: string): string {
+  // Remove leading slashes and normalize path
+  return key.replace(/^\/+/, '').replace(/\/+/g, '/');
+}
+
 async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAuditResult> {
   console.log(`🔍 Starting comprehensive 3-way audit for user ${userId}...`);
   console.log('='.repeat(80));
@@ -72,19 +105,10 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
       throw new Error(`Failed to list storage: ${storageResult.error}`);
     }
     
-    // Filter files that belong to this user
+    // Filter files that belong to this user with precise matching
     const userStorageFiles = storageResult.value.filter((file: any) => {
       const key = file.key || file.name || '';
-      return key.includes(`/${userId}/`) || 
-             key.includes(`photo/${userId}`) || 
-             key.includes(`profile/${userId}`) ||
-             key.startsWith(`${userId}/`) ||
-             key.includes(`-${userId}-`) ||
-             key.includes(`_${userId}_`) ||
-             // Match patterns like: 2025/05/1748392461011-nug0ogrq3ur.jpg for user 43075889
-             (key.includes('/05/') && key.includes('jpg')) ||
-             (key.includes('/photo/') && key.includes(userId.slice(-4))) || // Last 4 digits
-             key.includes('43075889'); // Direct user ID match
+      return isUserFile(key, userId);
     });
     
     console.log(`   Found ${userStorageFiles.length} files in object storage`);
@@ -107,25 +131,28 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
     
     console.log(`   Found ${photoRecords.length} records in photos table`);
     
-    // 4. Cross-reference analysis
-    console.log('🔄 Step 4: Performing cross-reference analysis...');
+    // 4. Normalize keys for comparison
+    console.log('🔄 Step 4: Normalizing keys for cross-reference...');
     
-    // Extract keys/paths for comparison
-    const storageKeys = userStorageFiles.map((file: any) => file.key || file.name || '');
-    const usageTableKeys = storageUsageRecords.map(record => record.fileKey);
-    const photoUrls = photoRecords.map(record => record.imageUrl || '');
-    const photoKeys = photoUrls.map(url => {
-      // Handle different URL patterns
-      let key = url.replace('/images/', '');
-      if (key.startsWith('http')) {
-        // Extract just the filename from full URLs
-        const urlParts = key.split('/');
-        key = urlParts.slice(-4).join('/'); // Get last 4 parts (user/year/month/filename)
-      }
-      return key;
-    });
+    const storageKeys = userStorageFiles
+      .map((file: any) => normalizeKey(file.key || file.name || ''))
+      .filter(key => key.length > 0);
     
-    // Find discrepancies
+    const usageTableKeys = storageUsageRecords
+      .map(record => normalizeKey(record.fileKey || ''))
+      .filter(key => key.length > 0);
+    
+    const photoKeys = photoRecords
+      .map(record => normalizeKey(extractStorageKeyFromUrl(record.imageUrl || '')))
+      .filter(key => key.length > 0);
+    
+    console.log(`   Normalized storage keys: ${storageKeys.length}`);
+    console.log(`   Normalized usage keys: ${usageTableKeys.length}`);
+    console.log(`   Normalized photo keys: ${photoKeys.length}`);
+    
+    // 5. Find exact matches and discrepancies
+    console.log('🔍 Step 5: Finding exact matches and discrepancies...');
+    
     const filesInStorageButNotInStorageUsage = storageKeys.filter(key => 
       !usageTableKeys.includes(key)
     );
@@ -135,7 +162,7 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
     );
     
     const filesInStorageUsageButNotInPhotos = usageTableKeys.filter(key => 
-      !photoKeys.some(photoKey => photoKey.includes(key) || key.includes(photoKey))
+      !photoKeys.includes(key)
     );
     
     const filesInPhotosButNotInStorage = photoKeys.filter(key => 
@@ -143,7 +170,7 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
     );
     
     const filesInPhotosButNotInStorageUsage = photoKeys.filter(key => 
-      !usageTableKeys.some(usageKey => usageKey.includes(key) || key.includes(usageKey))
+      !usageTableKeys.includes(key)
     );
     
     // Find perfect matches (files that exist in all three places)
@@ -156,12 +183,12 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
     
     for (const storageKey of storageKeys) {
       const usageRecord = storageUsageRecords.find(record => 
-        record.fileKey === storageKey
+        normalizeKey(record.fileKey || '') === storageKey
       );
       
       const photoRecord = photoRecords.find(photo => {
-        const photoKey = (photo.imageUrl || '').replace('/images/', '');
-        return photoKey === storageKey || storageKey.includes(photoKey) || photoKey.includes(storageKey);
+        const photoKey = normalizeKey(extractStorageKeyFromUrl(photo.imageUrl || ''));
+        return photoKey === storageKey;
       });
       
       if (usageRecord && photoRecord) {
@@ -185,24 +212,25 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
     const recommendations: string[] = [];
     
     if (filesInStorageButNotInStorageUsage.length > 0) {
-      recommendations.push(`${filesInStorageButNotInStorageUsage.length} files exist in storage but are not tracked in storage_usage table`);
+      recommendations.push(`❌ ${filesInStorageButNotInStorageUsage.length} files exist in storage but are not tracked in storage_usage table`);
     }
     
     if (filesInStorageUsageButNotInStorage.length > 0) {
-      recommendations.push(`${filesInStorageUsageButNotInStorage.length} storage_usage records reference non-existent files`);
+      recommendations.push(`❌ ${filesInStorageUsageButNotInStorage.length} storage_usage records reference non-existent files (phantom records)`);
     }
     
     if (filesInPhotosButNotInStorage.length > 0) {
-      recommendations.push(`${filesInPhotosButNotInStorage.length} photos reference missing storage files (phantom records)`);
+      recommendations.push(`❌ ${filesInPhotosButNotInStorage.length} photos reference missing storage files`);
     }
     
     if (filesInPhotosButNotInStorageUsage.length > 0) {
-      recommendations.push(`${filesInPhotosButNotInStorageUsage.length} photos are not tracked in storage_usage table`);
+      recommendations.push(`❌ ${filesInPhotosButNotInStorageUsage.length} photos are not tracked in storage_usage table`);
     }
     
-    if (perfectMatches.length === photoRecords.length && 
-        perfectMatches.length === storageUsageRecords.length && 
-        perfectMatches.length === storageKeys.length) {
+    if (perfectMatches.length === Math.max(photoRecords.length, storageUsageRecords.length, storageKeys.length) && 
+        discrepancies.storageVsUsageTable === 0 && 
+        discrepancies.storageVsPhotosTable === 0 && 
+        discrepancies.usageTableVsPhotosTable === 0) {
       recommendations.push('✅ Perfect synchronization: All files properly tracked across all systems');
     }
     
@@ -220,29 +248,28 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
     
     console.log(`\n🖼️ PHOTOS TABLE RECORDS (${photoKeys.length}):`);
     photoRecords.forEach((photo, i) => {
-      const key = (photo.imageUrl || '').replace('/images/', '');
+      const key = extractStorageKeyFromUrl(photo.imageUrl || '');
       console.log(`  ${i + 1}. ${key} ("${photo.title}")`);
     });
     
-    console.log(`\n❌ DISCREPANCIES FOUND:`);
     if (filesInStorageButNotInStorageUsage.length > 0) {
-      console.log(`\n  Files in storage but NOT in storage_usage table (${filesInStorageButNotInStorageUsage.length}):`);
-      filesInStorageButNotInStorageUsage.forEach(key => console.log(`    ❌ ${key}`));
+      console.log(`\n❌ Files in storage but NOT in storage_usage table (${filesInStorageButNotInStorageUsage.length}):`);
+      filesInStorageButNotInStorageUsage.forEach(key => console.log(`    • ${key}`));
     }
     
     if (filesInStorageUsageButNotInStorage.length > 0) {
-      console.log(`\n  Files in storage_usage but NOT in storage (${filesInStorageUsageButNotInStorage.length}):`);
-      filesInStorageUsageButNotInStorage.forEach(key => console.log(`    ❌ ${key}`));
+      console.log(`\n❌ Files in storage_usage but NOT in storage (${filesInStorageUsageButNotInStorage.length}):`);
+      filesInStorageUsageButNotInStorage.forEach(key => console.log(`    • ${key}`));
     }
     
     if (filesInPhotosButNotInStorage.length > 0) {
-      console.log(`\n  Files in photos table but NOT in storage (${filesInPhotosButNotInStorage.length}):`);
-      filesInPhotosButNotInStorage.forEach(key => console.log(`    ❌ ${key}`));
+      console.log(`\n❌ Files in photos table but NOT in storage (${filesInPhotosButNotInStorage.length}):`);
+      filesInPhotosButNotInStorage.forEach(key => console.log(`    • ${key}`));
     }
     
     if (filesInPhotosButNotInStorageUsage.length > 0) {
-      console.log(`\n  Files in photos table but NOT in storage_usage table (${filesInPhotosButNotInStorageUsage.length}):`);
-      filesInPhotosButNotInStorageUsage.forEach(key => console.log(`    ❌ ${key}`));
+      console.log(`\n❌ Files in photos table but NOT in storage_usage table (${filesInPhotosButNotInStorageUsage.length}):`);
+      filesInPhotosButNotInStorageUsage.forEach(key => console.log(`    • ${key}`));
     }
     
     console.log(`\n✅ PERFECT MATCHES (${perfectMatches.length}):`);
@@ -264,7 +291,7 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
         totalRecords: storageUsageRecords.length,
         records: storageUsageRecords.map(record => ({
           id: record.id,
-          fileKey: record.fileKey,
+          fileKey: record.fileKey || '',
           originalFilename: record.originalFilename || '',
           compressedSize: record.compressedSize || '',
           imageType: record.imageType || '',
@@ -300,10 +327,10 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
     console.log(`Storage Usage Records: ${auditResult.storageUsageTable.totalRecords}`);
     console.log(`Photos Table Records: ${auditResult.photosTable.totalRecords}`);
     console.log(`Perfect Matches: ${perfectMatches.length}`);
-    console.log(`Total Discrepancies: ${Object.values(discrepancies).reduce((a, b) => a + b, 0)}`);
+    console.log(`Total Issues: ${Object.values(discrepancies).reduce((a, b) => a + b, 0)}`);
     
     console.log('\n💡 RECOMMENDATIONS:');
-    recommendations.forEach(rec => console.log(`  - ${rec}`));
+    recommendations.forEach(rec => console.log(`  ${rec}`));
     
     return auditResult;
     
