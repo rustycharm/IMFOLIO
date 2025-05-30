@@ -79,12 +79,18 @@ const Lightbox = ({ photo, onClose, onNext, onPrev }: LightboxProps) => {
           </button>
         </div>
         
-        <div className="relative z-10 max-w-7xl max-h-screen px-4 select-none">
+        <div className="relative z-10 w-full h-full flex items-center justify-center p-8 select-none">
           <motion.img
             key={photo.id}
             src={photo.imageUrl}
             alt={photo.title}
-            className="max-h-[92vh] max-w-full mx-auto"
+            className="max-w-full max-h-full object-contain"
+            style={{
+              width: 'auto',
+              height: 'auto',
+              maxWidth: 'calc(100vw - 4rem)',
+              maxHeight: 'calc(100vh - 6rem)'
+            }}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}

@@ -155,7 +155,13 @@ export const PhotoLightbox = ({
           <AnimatePresence mode="wait">
             <motion.div
               key={currentPhoto.id}
-              className="relative max-w-full max-h-full flex items-center justify-center"
+              className="relative flex items-center justify-center"
+              style={{
+                width: '100%',
+                height: '100%',
+                maxWidth: 'calc(100vw - 4rem)',
+                maxHeight: 'calc(100vh - 4rem)'
+              }}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
@@ -170,10 +176,15 @@ export const PhotoLightbox = ({
                 src={currentPhoto.imageUrl}
                 alt={currentPhoto.title}
                 className={`
-                  max-w-full max-h-full object-contain cursor-pointer transition-opacity duration-300
-                  ${isPortrait ? 'h-full' : 'w-full'}
+                  object-contain cursor-pointer transition-opacity duration-300
                   ${imageLoaded ? 'opacity-100' : 'opacity-0'}
                 `}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  maxWidth: '100%',
+                  maxHeight: '100%'
+                }}
                 onLoad={handleImageLoad}
                 onClick={(e) => e.stopPropagation()}
               />
