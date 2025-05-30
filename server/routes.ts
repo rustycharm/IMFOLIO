@@ -1319,7 +1319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔍 Browsing object storage for user ${userId}`);
       
       // Get all database photo entries for this user for cross-reference
-      const dbPhotos = await storage.getPhotosByUser(parseInt(userId));
+      const dbPhotos = await storage.getPhotosByUser(userId);
       
       console.log(`📊 Found ${dbPhotos.length} photos in database for user ${userId}`);
       
@@ -1375,7 +1375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   id: dbEntry.id,
                   title: dbEntry.title,
                   isPublic: dbEntry.isPublic,
-                  isFeatured: dbEntry.isFeatured
+                  isFeatured: dbEntry.featured
                 } : null
               };
             });

@@ -175,7 +175,7 @@ export function ObjectStorageBrowser() {
             ) : (
               <div className="space-y-4">
                 {/* Summary */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-gray-50 rounded-lg">
                   <div className="text-center">
                     <div className="text-2xl font-bold">{userStorage?.totalFiles}</div>
                     <div className="text-sm text-gray-600">Total Files</div>
@@ -193,6 +193,18 @@ export function ObjectStorageBrowser() {
                       {userStorage?.files?.filter((f: StorageFile) => f.type.startsWith('image/')).length || 0}
                     </div>
                     <div className="text-sm text-gray-600">Images</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">
+                      {userStorage?.files?.filter((f: StorageFile) => f.hasDbEntry).length || 0}
+                    </div>
+                    <div className="text-sm text-gray-600">In Database</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-red-600">
+                      {userStorage?.files?.filter((f: StorageFile) => !f.hasDbEntry).length || 0}
+                    </div>
+                    <div className="text-sm text-gray-600">Orphaned</div>
                   </div>
                 </div>
 
