@@ -1476,12 +1476,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         month = String(uploadDate.getMonth() + 1).padStart(2, '0');
       }
       
-      // Generate imageUrl and newFileKey to match where files actually exist in storage
-      // Restored files are stored at root level, not in nested folders
-      const imageUrl = `/images/${fileName}`;
-      const newFileKey = fileName;
+      // Use the actual file location from object storage (originalFileKey contains the real path)
+      const imageUrl = `/images/${originalFileKey}`;
+      const newFileKey = originalFileKey;
       
-      console.log(`🔧 Creating restoration with:`, { imageUrl, newFileKey });
+      console.log(`🔧 Creating restoration with actual storage location:`, { imageUrl, newFileKey, originalPath: originalFileKey });
       
       // Check if this imageUrl already exists to prevent duplicates
       const existingPhoto = await storage.getPhotosByUser(userId);
