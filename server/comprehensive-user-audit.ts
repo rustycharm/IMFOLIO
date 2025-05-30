@@ -3,6 +3,7 @@ import { Client } from '@replit/object-storage';
 import { db } from './db';
 import { photos, storageUsage } from '../shared/schema';
 import { eq } from 'drizzle-orm';
+import { writeFile } from 'fs/promises';
 
 interface ComprehensiveAuditResult {
   userId: string;
@@ -77,7 +78,13 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
       return key.includes(`/${userId}/`) || 
              key.includes(`photo/${userId}`) || 
              key.includes(`profile/${userId}`) ||
-             key.startsWith(`${userId}/`);
+             key.startsWith(`${userId}/`) ||
+             key.includes(`-${userId}-`) ||
+             key.includes(`_${userId}_`) ||
+             // Match patterns like: 2025/05/1748392461011-nug0ogrq3ur.jpg for user 43075889
+             (key.includes('/05/') && key.includes('jpg')) ||
+             (key.includes('/photo/') && key.includes(userId.slice(-4))) || // Last 4 digits
+             key.includes('43075889'); // Direct user ID match
     });
     
     console.log(`   Found ${userStorageFiles.length} files in object storage`);
@@ -107,7 +114,16 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
     const storageKeys = userStorageFiles.map((file: any) => file.key || file.name || '');
     const usageTableKeys = storageUsageRecords.map(record => record.fileKey);
     const photoUrls = photoRecords.map(record => record.imageUrl || '');
-    const photoKeys = photoUrls.map(url => url.replace('/images/', ''));
+    const photoKeys = photoUrls.map(url => {
+      // Handle different URL patterns
+      let key = url.replace('/images/', '');
+      if (key.startsWith('http')) {
+        // Extract just the filename from full URLs
+        const urlParts = key.split('/');
+        key = urlParts.slice(-4).join('/'); // Get last 4 parts (user/year/month/filename)
+      }
+      return key;
+    });
     
     // Find discrepancies
     const filesInStorageButNotInStorageUsage = storageKeys.filter(key => 
@@ -303,8 +319,7 @@ async function main() {
     const auditResult = await comprehensiveUserAudit('43075889');
     
     // Write detailed results to a JSON file for further analysis
-    const fs = await import('fs/promises');
-    await fs.writeFile(
+    await writeFile(
       'comprehensive-audit-43075889.json', 
       JSON.stringify(auditResult, null, 2)
     );
