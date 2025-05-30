@@ -1540,6 +1540,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { filename } = req.params;
       
+      console.log(`🔧 Restored image request for: ${filename}`);
+      
       if (!filename) {
         return res.status(400).json({ error: 'Filename required' });
       }
@@ -1548,11 +1550,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const resolver = RestoredImageResolver.getInstance();
       
       const imageUrl = `/images/${filename}`;
+      console.log(`🔧 Calling resolver.getImage with imageUrl: ${imageUrl}`);
+      
       const imageBuffer = await resolver.getImage(imageUrl);
       
       if (!imageBuffer) {
+        console.log(`🔧 No image buffer returned for: ${filename}`);
         return res.status(404).json({ error: 'Image not found' });
       }
+      
+      console.log(`🔧 Successfully got image buffer, size: ${imageBuffer.length} bytes`);
+    }
 
       // Determine content type from filename
       const ext = filename.toLowerCase().split('.').pop();

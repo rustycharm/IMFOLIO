@@ -37,15 +37,21 @@ export class RestoredImageResolver {
     }
 
     try {
+      console.log(`🔍 Searching object storage for restored image: ${filename}`);
+      
       // Search for the file in object storage
       const result = await this.client.list({ prefix: 'photo/' });
       
       if (result.ok) {
+        console.log(`📂 Found ${result.value.length} files in object storage`);
+        
         const foundFile = result.value.find((obj: any) => 
           obj.key && obj.key.includes(filename)
         );
         
         if (foundFile && foundFile.key) {
+          console.log(`✅ Found restored image at: ${foundFile.key}`);
+          
           // Cache the result
           this.pathCache.set(filename, foundFile.key);
           
@@ -55,7 +61,18 @@ export class RestoredImageResolver {
           }, this.CACHE_TTL);
           
           return foundFile.key;
+        } else {
+          console.log(`❌ File ${filename} not found in object storage`);
+          
+          // Log available files for debugging
+          const availableFiles = result.value
+            .filter((obj: any) => obj.key)
+            .map((obj: any) => obj.key)
+            .slice(0, 10); // Show first 10 files
+          console.log(`📋 Sample files in storage:`, availableFiles);
         }
+      } else {
+        console.log(`❌ Failed to list files from object storage:`, result.error);
       }
     } catch (error) {
       console.error(`Error resolving image path for ${filename}:`, error);
