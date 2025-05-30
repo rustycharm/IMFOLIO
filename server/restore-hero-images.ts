@@ -25,28 +25,10 @@ const missingHeroConfigs: HeroImageConfig[] = [
   { id: 'heritage-building', name: 'Cultural Heritage', searchQuery: 'historic building heritage architecture', orientation: 'landscape' }
 ];
 
+// DISABLED: External Unsplash downloading removed to prevent hero image inconsistencies
 async function downloadImageFromUnsplash(query: string, orientation: string): Promise<Buffer> {
-  if (!UNSPLASH_ACCESS_KEY) {
-    throw new Error('Unsplash API key not configured');
-  }
-
-  const searchUrl = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&orientation=${orientation}&per_page=1`;
-  
-  const searchResponse = await fetch(searchUrl, {
-    headers: {
-      'Authorization': `Client-ID ${UNSPLASH_ACCESS_KEY}`
-    }
-  });
-
-  if (!searchResponse.ok) {
-    throw new Error(`Unsplash search failed: ${searchResponse.statusText}`);
-  }
-
-  const searchData = await searchResponse.json();
-  
-  if (!searchData.results || searchData.results.length === 0) {
-    throw new Error(`No images found for query: ${query}`);
-  }
+  throw new Error('External hero image downloading is disabled - using locked object storage collection only');
+}
 
   const imageUrl = searchData.results[0].urls.regular;
   

@@ -1,33 +1,12 @@
+// DISABLED: External image fetching removed to prevent hero image inconsistencies
+// This file has been disabled to lock in the current hero image collection
+// All hero images now serve exclusively from object storage
+
 import { storage } from "./storage";
-import { uploadImage } from "./objectStorage";
-import fetch from 'node-fetch';
 
-const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY;
-
-// We need 11 more hero images to reach 20 total
-// These categories complement our existing nature-themed collection
-const heroImageQueries = [
-  // Urban & Architecture
-  { query: "urban skyline sunset", id: "urban-skyline", name: "Urban Skyline", description: "City skyline illuminated at sunset" },
-  { query: "modern architecture minimal", id: "modern-building", name: "Modern Architecture", description: "Clean architectural lines and forms" },
-  { query: "street photography rain", id: "rainy-street", name: "Rain Reflections", description: "Urban street scene with rain reflections" },
-  
-  // Abstract & Artistic
-  { query: "abstract water ripples", id: "water-ripples", name: "Water Ripples", description: "Abstract patterns in flowing water" },
-  { query: "geometric shadows light", id: "shadow-patterns", name: "Light & Shadow", description: "Geometric patterns created by light and shadow" },
-  { query: "minimalist clouds sky", id: "cloud-formations", name: "Cloud Formations", description: "Minimalist sky with dramatic cloud formations" },
-  
-  // Cultural & Travel
-  { query: "vintage travel poster", id: "vintage-travel", name: "Vintage Wanderlust", description: "Classic travel photography aesthetic" },
-  { query: "cultural architecture heritage", id: "heritage-building", name: "Cultural Heritage", description: "Historic architecture and cultural landmarks" },
-  
-  // Seasonal & Atmospheric
-  { query: "winter snow landscape", id: "winter-scene", name: "Winter Wonderland", description: "Serene snow-covered landscape" },
-  { query: "golden wheat field", id: "wheat-field", name: "Golden Fields", description: "Endless golden wheat fields in summer light" },
-  { query: "dramatic storm landscape", id: "storm-sky", name: "Storm Approaching", description: "Dramatic storm clouds over open landscape" }
-];
-
+// DISABLED: External fetching functions removed
 async function fetchUnsplashHeroImage(query: string) {
+  throw new Error('External hero image fetching is disabled - using locked object storage collection only');
   const searchUrl = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=1&orientation=landscape&w=1920&h=1080`;
   
   try {
