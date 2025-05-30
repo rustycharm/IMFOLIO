@@ -45,37 +45,40 @@ export class RestoredImageResolver {
       if (result.ok) {
         console.log(`📂 Found ${result.value.length} files in object storage`);
         
-        const foundFile = result.value.find((obj: any) => 
-          obj.key && obj.key.includes(filename)
-        );
+        // First, debug what properties exist
+        if (result.value.length > 0) {
+          console.log(`📋 First object properties:`, Object.keys(result.value[0]));
+          console.log(`📋 First object sample:`, JSON.stringify(result.value[0], null, 2));
+        }
         
-        if (foundFile && foundFile.key) {
-          console.log(`✅ Found restored image at: ${foundFile.key}`);
+        // Try different possible property names for the file path
+        const foundFile = result.value.find((obj: any) => {
+          const filePath = obj.name || obj.key || obj.path || obj.Key || obj.objectName;
+          return filePath && filePath.includes(filename);
+        });
+        
+        if (foundFile) {
+          const filePath = foundFile.name || foundFile.key || foundFile.path || foundFile.Key || foundFile.objectName;
+          console.log(`✅ Found restored image at: ${filePath}`);
           
           // Cache the result
-          this.pathCache.set(filename, foundFile.key);
+          this.pathCache.set(filename, filePath);
           
           // Clean old cache entries after some time
           setTimeout(() => {
             this.pathCache.delete(filename);
           }, this.CACHE_TTL);
           
-          return foundFile.key;
+          return filePath;
         } else {
           console.log(`❌ File ${filename} not found in object storage`);
           
-          // Log available files for debugging
+          // Log available files for debugging - try all possible property names
           const availableFiles = result.value
-            .filter((obj: any) => obj.key)
-            .map((obj: any) => obj.key)
+            .map((obj: any) => obj.name || obj.key || obj.path || obj.Key || obj.objectName || 'unknown')
+            .filter(path => path !== 'unknown')
             .slice(0, 10); // Show first 10 files
           console.log(`📋 Sample files in storage:`, availableFiles);
-          
-          // Also check what properties the objects actually have
-          if (result.value.length > 0) {
-            console.log(`📋 First object properties:`, Object.keys(result.value[0]));
-            console.log(`📋 First object:`, result.value[0]);
-          }
         }
       } else {
         console.log(`❌ Failed to list files from object storage:`, result.error);
