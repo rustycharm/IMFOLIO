@@ -549,14 +549,14 @@ export default function PhotoUploader({ onSuccess }: { onSuccess?: () => void })
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="nature">Nature</SelectItem>
-                <SelectItem value="portrait">Portrait</SelectItem>
+                <SelectItem value="portraits">Portraits</SelectItem>
                 <SelectItem value="architecture">Architecture</SelectItem>
                 <SelectItem value="travel">Travel</SelectItem>
                 <SelectItem value="street">Street</SelectItem>
-                <SelectItem value="landscape">Landscape</SelectItem>
-                <SelectItem value="wildlife">Wildlife</SelectItem>
+                <SelectItem value="landscapes">Landscapes</SelectItem>
                 <SelectItem value="macro">Macro</SelectItem>
-                <SelectItem value="blackandwhite">Black & White</SelectItem>
+                <SelectItem value="artistic">Artistic</SelectItem>
+                <SelectItem value="black-and-white">Black & White</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>

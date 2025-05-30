@@ -52,9 +52,14 @@ const Gallery = ({ selectedCategory, onPhotoClick, setVisiblePhotos }: GalleryPr
     }
 
     if (isAuthenticated) {
-      // For logged-in users: separate featured and regular photos
-      const featured = photos.filter(photo => photo.featured === true);
-      const regular = photos.filter(photo => photo.featured !== true);
+      // For logged-in users: filter by category first, then separate featured and regular photos
+      let filteredPhotos = photos;
+      if (selectedCategory !== "all") {
+        filteredPhotos = photos.filter(photo => photo.category && photo.category === selectedCategory);
+      }
+      
+      const featured = filteredPhotos.filter(photo => photo.featured === true);
+      const regular = filteredPhotos.filter(photo => photo.featured !== true);
       
       return { 
         displayPhotos: [...featured, ...regular], 
