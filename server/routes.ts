@@ -1318,8 +1318,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🔍 Browsing object storage for user ${userId}`);
       
-      // Try both possible prefixes for user files
-      const possiblePrefixes = [`profile/${userId}/`, `photo/${userId}/`];
+      // Try both possible prefixes for user files (photos are primarily in photo/ path)
+      const possiblePrefixes = [`photo/${userId}/`, `profile/${userId}/`];
       let allFiles: any[] = [];
       
       for (const userPrefix of possiblePrefixes) {

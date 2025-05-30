@@ -144,14 +144,14 @@ export async function getUserStorageUsage(userId: number): Promise<{
     }
     
     // Count user's current files
-    const userRecords = await db
+    const userFileRecords = await db
       .select()
       .from(storageUsage)
       .where(eq(storageUsage.userId, userId))
       .orderBy(desc(storageUsage.createdAt));
 
     const fileTracker = new Map<string, boolean>();
-    for (const record of userRecords) {
+    for (const record of userFileRecords) {
       if (record.operation === 'upload') {
         fileTracker.set(record.fileKey, true);
       } else if (record.operation === 'delete') {
