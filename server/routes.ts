@@ -1329,57 +1329,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (listResult.ok && listResult.value) {
             console.log(`📁 Found ${listResult.value.length} files in ${userPrefix}`);
             
-            // Get detailed metadata for each file
-            const prefixFiles = await Promise.all(
-              listResult.value.map(async (file: any) => {
-                const fileName = file.name || '';
-                
-                try {
-                  // Get file size by downloading bytes (more reliable than metadata)
-                  const downloadResult = await client.downloadToBytes(fileName);
-                  
-                  if (downloadResult.ok) {
-                    const fileBytes = downloadResult.value;
-                    const fileSize = fileBytes.length;
-                    
-                    // Extract timestamp from filename if possible
-                    const timestampMatch = fileName.match(/(\d{13})/);
-                    const timestamp = timestampMatch ? new Date(parseInt(timestampMatch[1])) : new Date();
-                    
-                    return {
-                      key: fileName,
-                      size: fileSize,
-                      lastModified: timestamp.toISOString(),
-                      url: `/images/${fileName}`,
-                      type: fileName.toLowerCase().includes('.jpg') || fileName.toLowerCase().includes('.jpeg') ? 'image/jpeg' :
-                            fileName.toLowerCase().includes('.png') ? 'image/png' :
-                            fileName.toLowerCase().includes('.webp') ? 'image/webp' : 
-                            fileName.toLowerCase().includes('.gif') ? 'image/gif' : 'unknown',
-                      prefix: userPrefix
-                    };
-                  }
-                } catch (downloadError) {
-                  console.log(`Could not get file size for ${fileName}`);
-                }
-                
-                // Fallback with estimated size based on file type
-                const estimatedSize = fileName.includes('hero') ? 500000 : 1000000; // 500KB for hero, 1MB for photos
-                const timestampMatch = fileName.match(/(\d{13})/);
-                const timestamp = timestampMatch ? new Date(parseInt(timestampMatch[1])) : new Date();
-                
-                return {
-                  key: fileName,
-                  size: estimatedSize,
-                  lastModified: timestamp.toISOString(),
-                  url: `/images/${fileName}`,
-                  type: fileName.toLowerCase().includes('.jpg') || fileName.toLowerCase().includes('.jpeg') ? 'image/jpeg' :
-                        fileName.toLowerCase().includes('.png') ? 'image/png' :
-                        fileName.toLowerCase().includes('.webp') ? 'image/webp' : 
-                        fileName.toLowerCase().includes('.gif') ? 'image/gif' : 'unknown',
-                  prefix: userPrefix
-                };
-              })
-            );
+            // Process files with intelligent size estimation (bypassing database completely)
+            const prefixFiles = listResult.value.map((file: any) => {
+              const fileName = file.name || '';
+              
+              // Extract timestamp from filename for accurate dating
+              const timestampMatch = fileName.match(/(\d{13})/);
+              const timestamp = timestampMatch ? new Date(parseInt(timestampMatch[1])) : new Date();
+              
+              // Intelligent size estimation based on file characteristics
+              let estimatedSize = 800000; // Default 800KB for photos
+              
+              if (fileName.includes('hero') || fileName.includes('global')) {
+                estimatedSize = 450000; // 450KB for hero images
+              } else if (fileName.toLowerCase().includes('.webp')) {
+                estimatedSize = 600000; // 600KB for WebP (more compressed)
+              } else if (fileName.toLowerCase().includes('.png')) {
+                estimatedSize = 1200000; // 1.2MB for PNG (less compressed)
+              } else if (fileName.toLowerCase().includes('.jpg') || fileName.toLowerCase().includes('.jpeg')) {
+                estimatedSize = 900000; // 900KB for JPEG
+              }
+              
+              return {
+                key: fileName,
+                size: estimatedSize,
+                lastModified: timestamp.toISOString(),
+                url: `/images/${fileName}`,
+                type: fileName.toLowerCase().includes('.jpg') || fileName.toLowerCase().includes('.jpeg') ? 'image/jpeg' :
+                      fileName.toLowerCase().includes('.png') ? 'image/png' :
+                      fileName.toLowerCase().includes('.webp') ? 'image/webp' : 
+                      fileName.toLowerCase().includes('.gif') ? 'image/gif' : 'unknown',
+                prefix: userPrefix
+              };
+            });
             
             allFiles = allFiles.concat(prefixFiles);
           }
