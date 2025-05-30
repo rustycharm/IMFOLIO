@@ -1464,8 +1464,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🔧 Attempting to restore orphaned file to database: ${fileName} for user ${userId}`);
       
-      // Generate imageUrl to match the upload system pattern (just filename)
-      const imageUrl = `/images/${fileName}`;
+      // Extract timestamp from filename for creation date and URL structure
+      let uploadDate = new Date();
+      let year = uploadDate.getFullYear();
+      let month = String(uploadDate.getMonth() + 1).padStart(2, '0');
+      
+      const timestampMatch = fileName.match(/^(\d{13})-/);
+      if (timestampMatch) {
+        uploadDate = new Date(parseInt(timestampMatch[1]));
+        year = uploadDate.getFullYear();
+        month = String(uploadDate.getMonth() + 1).padStart(2, '0');
+      }
+      
+      // Generate imageUrl and fileKey to match the upload system pattern
+      const imageUrl = `/images/photo/${userId}/${year}/${month}/${fileName}`;
+      const fileKey = `photo/${userId}/${year}/${month}/${fileName}`;
+      
+      console.log(`🔧 Creating restoration with:`, { imageUrl, fileKey });
       
       // Check if this imageUrl already exists to prevent duplicates
       const existingPhoto = await storage.getPhotosByUser(userId);
@@ -1482,13 +1497,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Extract timestamp from filename for creation date if possible
-      let uploadDate = new Date();
-      const timestampMatch = fileName.match(/^(\d{13})-/);
-      if (timestampMatch) {
-        uploadDate = new Date(parseInt(timestampMatch[1]));
-      }
-      
       // Generate a meaningful title from filename
       let title = fileName;
       // Remove timestamp prefix and file extension
@@ -1496,11 +1504,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Replace common separators with spaces and capitalize
       title = title.replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       
-      // Create new photo entry
+      // Create new photo entry with file key
       const newPhoto = await storage.createPhoto({
         userId,
         title,
         imageUrl,
+        fileKey,
         isPublic: false, // Default to private for safety
         featured: false, // Default not featured
         uploadedAt: uploadDate
