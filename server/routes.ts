@@ -1476,9 +1476,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         month = String(uploadDate.getMonth() + 1).padStart(2, '0');
       }
       
-      // Generate imageUrl and newFileKey to match the upload system pattern
-      const imageUrl = `/images/photo/${userId}/${year}/${month}/${fileName}`;
-      const newFileKey = `photo/${userId}/${year}/${month}/${fileName}`;
+      // Generate imageUrl and newFileKey to match where files actually exist in storage
+      // Restored files are stored at root level, not in nested folders
+      const imageUrl = `/images/${fileName}`;
+      const newFileKey = fileName;
       
       console.log(`🔧 Creating restoration with:`, { imageUrl, newFileKey });
       
