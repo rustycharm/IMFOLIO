@@ -1327,29 +1327,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const listResult = await client.list({ prefix: userPrefix });
           
           if (listResult.ok && listResult.value) {
-            console.log(`📁 Found ${listResult.value.length} files in ${userPrefix}:`, listResult.value.slice(0, 2));
+            console.log(`📁 Found ${listResult.value.length} files in ${userPrefix}`);
             
-            const prefixFiles = listResult.value.map((file: any) => {
-              // Log the actual file object structure to understand what properties are available
-              console.log('📄 File object properties:', Object.keys(file));
-              console.log('📄 Raw file data:', file);
-              
-              const fileName = file.name || file.key || file.path || '';
-              const fileSize = file.size || file.contentLength || 0;
-              const modifiedDate = file.lastModified || file.modified || file.updated || new Date().toISOString();
-              
-              return {
-                key: fileName,
-                size: fileSize,
-                lastModified: modifiedDate,
-                url: `/images/${fileName}`,
-                type: fileName.toLowerCase().includes('.jpg') || fileName.toLowerCase().includes('.jpeg') ? 'image/jpeg' :
-                      fileName.toLowerCase().includes('.png') ? 'image/png' :
-                      fileName.toLowerCase().includes('.webp') ? 'image/webp' : 
-                      fileName.toLowerCase().includes('.gif') ? 'image/gif' : 'unknown',
-                prefix: userPrefix
-              };
-            });
+            // Get detailed metadata for each file
+            const prefixFiles = await Promise.all(
+              listResult.value.map(async (file: any) => {
+                const fileName = file.name || '';
+                
+                try {
+                  // Get file metadata
+                  const headResult = await client.head(fileName);
+                  
+                  if (headResult.ok) {
+                    const metadata = headResult.value;
+                    return {
+                      key: fileName,
+                      size: metadata.contentLength || 0,
+                      lastModified: metadata.lastModified || new Date().toISOString(),
+                      url: `/images/${fileName}`,
+                      type: fileName.toLowerCase().includes('.jpg') || fileName.toLowerCase().includes('.jpeg') ? 'image/jpeg' :
+                            fileName.toLowerCase().includes('.png') ? 'image/png' :
+                            fileName.toLowerCase().includes('.webp') ? 'image/webp' : 
+                            fileName.toLowerCase().includes('.gif') ? 'image/gif' : 'unknown',
+                      prefix: userPrefix
+                    };
+                  }
+                } catch (metadataError) {
+                  console.log(`Could not get metadata for ${fileName}`);
+                }
+                
+                // Fallback if metadata fetch fails
+                return {
+                  key: fileName,
+                  size: 0,
+                  lastModified: new Date().toISOString(),
+                  url: `/images/${fileName}`,
+                  type: fileName.toLowerCase().includes('.jpg') || fileName.toLowerCase().includes('.jpeg') ? 'image/jpeg' :
+                        fileName.toLowerCase().includes('.png') ? 'image/png' :
+                        fileName.toLowerCase().includes('.webp') ? 'image/webp' : 
+                        fileName.toLowerCase().includes('.gif') ? 'image/gif' : 'unknown',
+                  prefix: userPrefix
+                };
+              })
+            );
+            
             allFiles = allFiles.concat(prefixFiles);
           }
         } catch (prefixError) {
