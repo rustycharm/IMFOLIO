@@ -1,8 +1,8 @@
 // Shared list of photo categories across the application
 export const photoCategories = [
   { id: "all", label: "All" },
-  { id: "landscapes", label: "Landscapes" },
-  { id: "portraits", label: "Portraits" },
+  { id: "landscape", label: "Landscape" },
+  { id: "portrait", label: "Portrait" },
   { id: "artistic", label: "Artistic" },
   { id: "nature", label: "Nature" },
   { id: "street", label: "Street" },

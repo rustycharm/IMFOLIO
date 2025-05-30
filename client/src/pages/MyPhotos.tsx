@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { ImageIcon, Upload, Trash2, Search, Palette, Edit } from "lucide-react";
 import { generatePortfolioUrl } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { photoCategories } from "@/lib/categories";
 import {
   Dialog,
   DialogContent,
@@ -590,10 +591,7 @@ function EditPhotoForm({ photo, onSubmit, isLoading }: {
   const [category, setCategory] = useState(photo.category || '');
   const [tagsInput, setTagsInput] = useState((photo.tags || []).join(', '));
 
-  const categories = [
-    'landscape', 'portrait', 'street', 'wedding', 'event', 'commercial', 
-    'fashion', 'nature', 'architecture', 'travel', 'documentary', 'artistic', 'other'
-  ];
+  const categories = photoCategories.filter(cat => cat.id !== "all").map(cat => cat.id);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

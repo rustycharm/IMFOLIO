@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, X, Loader2, Info, Sparkles, Check, Edit3 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { photoCategories } from "@/lib/categories";
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "image/tiff"];
@@ -548,16 +549,11 @@ export default function PhotoUploader({ onSuccess }: { onSuccess?: () => void })
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="nature">Nature</SelectItem>
-                <SelectItem value="portraits">Portraits</SelectItem>
-                <SelectItem value="architecture">Architecture</SelectItem>
-                <SelectItem value="travel">Travel</SelectItem>
-                <SelectItem value="street">Street</SelectItem>
-                <SelectItem value="landscapes">Landscapes</SelectItem>
-                <SelectItem value="macro">Macro</SelectItem>
-                <SelectItem value="artistic">Artistic</SelectItem>
-                <SelectItem value="black-and-white">Black & White</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                {photoCategories.filter(cat => cat.id !== "all").map(category => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
