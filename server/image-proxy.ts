@@ -176,7 +176,6 @@ export async function serveImage(req: Request, res: Response) {
       'Vary': 'Accept-Encoding',
       // Security headers
       'X-Content-Type-Options': 'nosniff',
-      'Content-Security-Policy': "default-src 'none'",
     });
     
     // Send the image data
