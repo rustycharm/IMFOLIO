@@ -97,12 +97,12 @@ export const PhotoLightbox = ({
           onClick={onClose}
         />
 
-        {/* Navigation Controls */}
-        <div className="absolute top-4 right-4 z-20 flex gap-2">
+        {/* Navigation Controls - Overlaid on image */}
+        <div className="absolute top-6 right-6 z-30 flex gap-2">
           <Button
             variant="ghost"
             size="icon"
-            className="text-white hover:bg-white/20 h-12 w-12"
+            className="text-white hover:bg-black/50 bg-black/30 backdrop-blur-sm h-12 w-12 rounded-full transition-all duration-200"
             onClick={() => setShowInfo(!showInfo)}
           >
             <Info className="h-5 w-5" />
@@ -110,25 +110,25 @@ export const PhotoLightbox = ({
           <Button
             variant="ghost"
             size="icon"
-            className="text-white hover:bg-white/20 h-12 w-12"
+            className="text-white hover:bg-black/50 bg-black/30 backdrop-blur-sm h-12 w-12 rounded-full transition-all duration-200"
             onClick={onClose}
           >
             <X className="h-5 w-5" />
           </Button>
         </div>
 
-        {/* Photo counter */}
-        <div className="absolute top-4 left-4 z-20 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
+        {/* Photo counter - Overlaid on image */}
+        <div className="absolute top-6 left-6 z-30 text-white text-sm bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full">
           {currentIndex + 1} / {photos.length}
         </div>
 
-        {/* Previous/Next buttons */}
+        {/* Previous/Next buttons - Overlaid on image sides */}
         {photos.length > 1 && (
           <>
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 text-white hover:bg-white/20 h-14 w-14"
+              className="absolute left-6 top-1/2 -translate-y-1/2 z-30 text-white hover:bg-black/50 bg-black/30 backdrop-blur-sm h-16 w-16 rounded-full transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
                 onNavigate('prev');
@@ -139,7 +139,7 @@ export const PhotoLightbox = ({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 text-white hover:bg-white/20 h-14 w-14"
+              className="absolute right-6 top-1/2 -translate-y-1/2 z-30 text-white hover:bg-black/50 bg-black/30 backdrop-blur-sm h-16 w-16 rounded-full transition-all duration-200"
               onClick={(e) => {
                 e.stopPropagation();
                 onNavigate('next');
@@ -150,18 +150,12 @@ export const PhotoLightbox = ({
           </>
         )}
 
-        {/* Main image container */}
-        <div className="relative w-full h-full flex items-center justify-center p-8">
+        {/* Main image container - Full viewport */}
+        <div className="relative w-full h-full flex items-center justify-center">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentPhoto.id}
-              className="relative flex items-center justify-center"
-              style={{
-                width: '100%',
-                height: '100%',
-                maxWidth: 'calc(100vw - 4rem)',
-                maxHeight: 'calc(100vh - 4rem)'
-              }}
+              className="relative flex items-center justify-center w-full h-full"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
@@ -169,22 +163,16 @@ export const PhotoLightbox = ({
             >
               {/* Loading skeleton */}
               {!imageLoaded && (
-                <div className="absolute inset-0 bg-gray-800 animate-pulse rounded" />
+                <div className="absolute inset-0 bg-gray-800 animate-pulse" />
               )}
               
               <img
                 src={currentPhoto.imageUrl}
                 alt={currentPhoto.title}
                 className={`
-                  object-contain cursor-pointer transition-opacity duration-300
+                  w-full h-full object-contain cursor-pointer transition-opacity duration-300
                   ${imageLoaded ? 'opacity-100' : 'opacity-0'}
                 `}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  maxWidth: '100%',
-                  maxHeight: '100%'
-                }}
                 onLoad={handleImageLoad}
                 onClick={(e) => e.stopPropagation()}
               />
