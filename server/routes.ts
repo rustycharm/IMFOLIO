@@ -1291,6 +1291,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin route to browse object storage directly
+  app.get("/api/admin/object-storage/users", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { Client } = await import('@replit/object-storage');
+      const client = new Client();
+      
+      console.log('🔍 Fetching all users for object storage browser');
+      
+      // Get users from database for selection
+      const users = await storage.getAllUsers();
+      
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users for object storage browser:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Admin route to browse specific user's files in object storage
+  app.get("/api/admin/object-storage/user/:userId", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { Client } = await import('@replit/object-storage');
+      const client = new Client();
+      
+      console.log(`🔍 Browsing object storage for user ${userId}`);
+      
+      // List all files with user's prefix
+      const userPrefix = `profile/${userId}/`;
+      const listResult = await client.list({ prefix: userPrefix });
+      
+      if (!listResult.ok) {
+        throw new Error('Failed to list files from object storage');
+      }
+      
+      const files = listResult.value.map((file: any) => ({
+        key: file.key || '',
+        size: file.size || 0,
+        lastModified: file.lastModified || new Date().toISOString(),
+        url: `/images/${file.key || ''}`,
+        type: (file.key || '').toLowerCase().includes('.jpg') || (file.key || '').toLowerCase().includes('.jpeg') ? 'image/jpeg' :
+              (file.key || '').toLowerCase().includes('.png') ? 'image/png' :
+              (file.key || '').toLowerCase().includes('.webp') ? 'image/webp' : 'unknown'
+      }));
+      
+      res.json({
+        userId,
+        userPrefix,
+        totalFiles: files.length,
+        files: files.sort((a: any, b: any) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
+      });
+    } catch (error) {
+      console.error(`Error browsing object storage for user ${req.params.userId}:`, error);
+      res.status(500).json({ 
+        message: "Failed to browse user files",
+        error: error.message 
+      });
+    }
+  });
+
   // Admin route to get storage audit with real metrics
   app.get("/api/admin/storage/audit", async (req, res) => {
     try {

@@ -11,12 +11,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Users, Image, Settings, Upload, ExternalLink, Check, Star, Brain, Lightbulb, TrendingUp, Clock, Palette, Sparkles, Monitor, HardDrive, Search } from "lucide-react";
+import { Shield, Users, Image, Settings, Upload, ExternalLink, Check, Star, Brain, Lightbulb, TrendingUp, Clock, Palette, Sparkles, Monitor, HardDrive, Search, FolderOpen } from "lucide-react";
 import { Link } from "wouter";
 import { ColorPaletteDisplay } from "@/components/ColorPaletteDisplay";
 import CompatibilityDashboard from "@/components/CompatibilityDashboard";
 import { StorageAnalytics } from "@/components/StorageAnalytics";
 import { UserStorageAudit } from "@/components/UserStorageAudit";
+import { ObjectStorageBrowser } from "@/components/ObjectStorageBrowser";
 
 
 export default function AdminDashboard() {
@@ -498,6 +499,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="storage" className="whitespace-nowrap flex-shrink-0 min-w-fit">
               <HardDrive className="w-4 h-4 mr-2" />
               Storage Analytics
+            </TabsTrigger>
+            <TabsTrigger value="object-storage" className="whitespace-nowrap flex-shrink-0 min-w-fit">
+              <FolderOpen className="w-4 h-4 mr-2" />
+              Object Storage
             </TabsTrigger>
             <TabsTrigger value="settings" className="whitespace-nowrap flex-shrink-0 min-w-fit">
               <Settings className="w-4 h-4 mr-2" />
@@ -1413,6 +1418,10 @@ export default function AdminDashboard() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="object-storage" className="space-y-6">
+          <ObjectStorageBrowser />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
