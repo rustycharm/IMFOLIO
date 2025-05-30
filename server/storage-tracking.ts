@@ -70,14 +70,20 @@ export async function getTotalStorageUsage(): Promise<{
   formattedSize: string;
 }> {
   try {
-    // Sum all upload/delete operations to get net storage usage
-    const result = await db
-      .select({
-        totalBytes: sum(storageUsage.fileSize)
-      })
+    // Get all records and calculate manually due to schema issues
+    const allRecords = await db
+      .select()
       .from(storageUsage);
 
-    const totalBytes = Number(result[0]?.totalBytes) || 0;
+    let totalBytes = 0;
+    for (const record of allRecords) {
+      const size = parseInt(record.compressedSize || '0', 10);
+      if (record.operation === 'upload') {
+        totalBytes += size;
+      } else if (record.operation === 'delete') {
+        totalBytes -= size;
+      }
+    }
     
     // Count current files (uploads minus deletes)
     const fileCountResult = await db
@@ -121,14 +127,21 @@ export async function getUserStorageUsage(userId: number): Promise<{
   formattedSize: string;
 }> {
   try {
-    const result = await db
-      .select({
-        totalBytes: sum(storageUsage.fileSize)
-      })
+    // Get user records and calculate manually
+    const userRecords = await db
+      .select()
       .from(storageUsage)
-      .where(eq(storageUsage.userId, userId));
+      .where(eq(storageUsage.userId, userId.toString()));
 
-    const totalBytes = Number(result[0]?.totalBytes) || 0;
+    let totalBytes = 0;
+    for (const record of userRecords) {
+      const size = parseInt(record.compressedSize || '0', 10);
+      if (record.operation === 'upload') {
+        totalBytes += size;
+      } else if (record.operation === 'delete') {
+        totalBytes -= size;
+      }
+    }
     
     // Count user's current files
     const userRecords = await db

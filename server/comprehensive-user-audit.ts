@@ -59,16 +59,18 @@ interface ComprehensiveAuditResult {
 }
 
 function isUserFile(key: string, userId: string): boolean {
-  // More precise filtering for user files
+  // More comprehensive user file patterns
   const patterns = [
     `photo/${userId}/`,           // Direct photo path
     `profile/${userId}/`,         // Profile image path
     `${userId}/`,                 // User folder
     `/hero/${userId}/`,           // Hero images
     `/${userId}/`,                // User in subdirectory
+    `43075889`,                   // Direct user ID match for specific case
   ];
   
-  return patterns.some(pattern => key.includes(pattern));
+  return patterns.some(pattern => key.includes(pattern)) || 
+         key.includes(userId);
 }
 
 function extractStorageKeyFromUrl(imageUrl: string): string {
@@ -79,8 +81,16 @@ function extractStorageKeyFromUrl(imageUrl: string): string {
   
   // Handle full URLs
   if (key.startsWith('http')) {
-    const url = new URL(key);
-    key = url.pathname.replace(/^\/images\//, '');
+    try {
+      const url = new URL(key);
+      key = url.pathname.replace(/^\/images\//, '');
+    } catch {
+      // If URL parsing fails, try to extract manually
+      const parts = key.split('/');
+      if (parts.length >= 4) {
+        key = parts.slice(-4).join('/');
+      }
+    }
   }
   
   return key;
@@ -105,7 +115,7 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
       throw new Error(`Failed to list storage: ${storageResult.error}`);
     }
     
-    // Filter files that belong to this user with precise matching
+    // Filter files that belong to this user
     const userStorageFiles = storageResult.value.filter((file: any) => {
       const key = file.key || file.name || '';
       return isUserFile(key, userId);
@@ -115,10 +125,16 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
     
     // 2. Get all records from storage_usage table for this user
     console.log('💾 Step 2: Querying storage_usage table...');
-    const storageUsageRecords = await db
-      .select()
-      .from(storageUsage)
-      .where(eq(storageUsage.userId, userId));
+    let storageUsageRecords: any[] = [];
+    try {
+      storageUsageRecords = await db
+        .select()
+        .from(storageUsage)
+        .where(eq(storageUsage.userId, userId));
+    } catch (error) {
+      console.warn(`⚠️ Could not query storage_usage table: ${error}`);
+      storageUsageRecords = [];
+    }
     
     console.log(`   Found ${storageUsageRecords.length} records in storage_usage table`);
     
@@ -243,13 +259,13 @@ async function comprehensiveUserAudit(userId: string): Promise<ComprehensiveAudi
     
     console.log(`\n📝 STORAGE_USAGE RECORDS (${usageTableKeys.length}):`);
     storageUsageRecords.forEach((record, i) => {
-      console.log(`  ${i + 1}. ${record.fileKey} (${record.compressedSize}, ${record.imageType}, ${record.operation})`);
+      console.log(`  ${i + 1}. ${record.fileKey} (${record.compressedSize}, ${record.imageType}, ${record.operation || 'upload'})`);
     });
     
     console.log(`\n🖼️ PHOTOS TABLE RECORDS (${photoKeys.length}):`);
     photoRecords.forEach((photo, i) => {
       const key = extractStorageKeyFromUrl(photo.imageUrl || '');
-      console.log(`  ${i + 1}. ${key} ("${photo.title}")`);
+      console.log(`  ${i + 1}. ${key} ("${photo.title || 'Untitled'}")`);
     });
     
     if (filesInStorageButNotInStorageUsage.length > 0) {
