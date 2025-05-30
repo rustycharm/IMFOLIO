@@ -1453,10 +1453,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin route to restore orphaned file to database
   app.post("/api/admin/object-storage/restore-file", isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const { userId, fileKey, fileName, fileSize, fileType } = req.body;
+      const { userId, fileKey: originalFileKey, fileName, fileSize, fileType } = req.body;
       
       // Validate required fields
-      if (!userId || !fileKey || !fileName) {
+      if (!userId || !originalFileKey || !fileName) {
         return res.status(400).json({ 
           message: "Missing required fields: userId, fileKey, fileName" 
         });
@@ -1476,11 +1476,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         month = String(uploadDate.getMonth() + 1).padStart(2, '0');
       }
       
-      // Generate imageUrl and fileKey to match the upload system pattern
+      // Generate imageUrl and newFileKey to match the upload system pattern
       const imageUrl = `/images/photo/${userId}/${year}/${month}/${fileName}`;
-      const fileKey = `photo/${userId}/${year}/${month}/${fileName}`;
+      const newFileKey = `photo/${userId}/${year}/${month}/${fileName}`;
       
-      console.log(`🔧 Creating restoration with:`, { imageUrl, fileKey });
+      console.log(`🔧 Creating restoration with:`, { imageUrl, newFileKey });
       
       // Check if this imageUrl already exists to prevent duplicates
       const existingPhoto = await storage.getPhotosByUser(userId);
@@ -1509,7 +1509,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         title,
         imageUrl,
-        fileKey,
+        fileKey: newFileKey,
         isPublic: false, // Default to private for safety
         featured: false, // Default not featured
         uploadedAt: uploadDate
