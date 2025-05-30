@@ -29,6 +29,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/landing" component={Landing} />
       <Route path="/account" component={Account} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/my-photos" component={MyPhotos} />
       <Route path="/portfolio/:username" component={Portfolio} />
