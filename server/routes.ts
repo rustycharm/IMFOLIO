@@ -1327,16 +1327,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const listResult = await client.list({ prefix: userPrefix });
           
           if (listResult.ok && listResult.value) {
-            const prefixFiles = listResult.value.map((file: any) => ({
-              key: file.key || '',
-              size: file.size || 0,
-              lastModified: file.lastModified || new Date().toISOString(),
-              url: `/images/${file.key || ''}`,
-              type: (file.key || '').toLowerCase().includes('.jpg') || (file.key || '').toLowerCase().includes('.jpeg') ? 'image/jpeg' :
-                    (file.key || '').toLowerCase().includes('.png') ? 'image/png' :
-                    (file.key || '').toLowerCase().includes('.webp') ? 'image/webp' : 'unknown',
-              prefix: userPrefix
-            }));
+            console.log(`📁 Found ${listResult.value.length} files in ${userPrefix}:`, listResult.value.slice(0, 2));
+            
+            const prefixFiles = listResult.value.map((file: any) => {
+              // Log the actual file object structure to understand what properties are available
+              console.log('📄 File object properties:', Object.keys(file));
+              console.log('📄 Raw file data:', file);
+              
+              const fileName = file.name || file.key || file.path || '';
+              const fileSize = file.size || file.contentLength || 0;
+              const modifiedDate = file.lastModified || file.modified || file.updated || new Date().toISOString();
+              
+              return {
+                key: fileName,
+                size: fileSize,
+                lastModified: modifiedDate,
+                url: `/images/${fileName}`,
+                type: fileName.toLowerCase().includes('.jpg') || fileName.toLowerCase().includes('.jpeg') ? 'image/jpeg' :
+                      fileName.toLowerCase().includes('.png') ? 'image/png' :
+                      fileName.toLowerCase().includes('.webp') ? 'image/webp' : 
+                      fileName.toLowerCase().includes('.gif') ? 'image/gif' : 'unknown',
+                prefix: userPrefix
+              };
+            });
             allFiles = allFiles.concat(prefixFiles);
           }
         } catch (prefixError) {
