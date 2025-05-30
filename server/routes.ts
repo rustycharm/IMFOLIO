@@ -1335,14 +1335,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`📁 Found ${listResult.value.length} files in ${userPrefix}`);
             console.log(`🔍 First file structure:`, JSON.stringify(listResult.value[0], null, 2));
             
-            // Process files with data directly from the list response
-            const prefixFiles = listResult.value.map((file: any) => {
+            // Process files and get actual file sizes from storage
+            const prefixFiles = await Promise.all(listResult.value.map(async (file: any) => {
               const fileName = file.name.split('/').pop() || file.name;
               const fileKey = file.name;
               
-              // The storage API only provides the name, no size or timestamp data available
-              const actualSize = null; // No size data available from storage API
-              const actualLastModified = null; // No timestamp data available from storage API
+              // Get actual file size by downloading bytes (header only)
+              let actualSize = null;
+              try {
+                const downloadResult = await client.downloadAsBytes(file.name);
+                if (downloadResult.ok && downloadResult.value && downloadResult.value[0]) {
+                  actualSize = downloadResult.value[0].length;
+                }
+              } catch (error) {
+                console.warn(`Could not get size for ${file.name}:`, error);
+              }
+              
+              // Extract timestamp from filename if possible (format: timestamp-id.ext)
+              let actualLastModified = null;
+              const timestampMatch = fileName.match(/^(\d{13})-/);
+              if (timestampMatch) {
+                actualLastModified = new Date(parseInt(timestampMatch[1])).toISOString();
+              }
               
               // Check if this file has a corresponding database entry
               const fileUrl = `/images/${fileName}`;
@@ -1367,7 +1381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   isFeatured: dbEntry.featured
                 } : null
               };
-            });
+            }));
             
             allFiles = allFiles.concat(prefixFiles);
           }
