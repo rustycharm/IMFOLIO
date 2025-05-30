@@ -73,7 +73,7 @@ export default function MyPhotos() {
         description: "Please log in to manage your photos.",
         variant: "destructive"
       });
-      setLocation("/login");
+      setLocation("/");
     }
   }, [isAuthenticated, setLocation, toast]);
 
