@@ -1335,15 +1335,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 const fileName = file.name || '';
                 
                 try {
-                  // Get file metadata
-                  const headResult = await client.head(fileName);
+                  // Get file size by downloading bytes (more reliable than metadata)
+                  const downloadResult = await client.downloadToBytes(fileName);
                   
-                  if (headResult.ok) {
-                    const metadata = headResult.value;
+                  if (downloadResult.ok) {
+                    const fileBytes = downloadResult.value;
+                    const fileSize = fileBytes.length;
+                    
+                    // Extract timestamp from filename if possible
+                    const timestampMatch = fileName.match(/(\d{13})/);
+                    const timestamp = timestampMatch ? new Date(parseInt(timestampMatch[1])) : new Date();
+                    
                     return {
                       key: fileName,
-                      size: metadata.contentLength || 0,
-                      lastModified: metadata.lastModified || new Date().toISOString(),
+                      size: fileSize,
+                      lastModified: timestamp.toISOString(),
                       url: `/images/${fileName}`,
                       type: fileName.toLowerCase().includes('.jpg') || fileName.toLowerCase().includes('.jpeg') ? 'image/jpeg' :
                             fileName.toLowerCase().includes('.png') ? 'image/png' :
@@ -1352,15 +1358,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       prefix: userPrefix
                     };
                   }
-                } catch (metadataError) {
-                  console.log(`Could not get metadata for ${fileName}`);
+                } catch (downloadError) {
+                  console.log(`Could not get file size for ${fileName}`);
                 }
                 
-                // Fallback if metadata fetch fails
+                // Fallback with estimated size based on file type
+                const estimatedSize = fileName.includes('hero') ? 500000 : 1000000; // 500KB for hero, 1MB for photos
+                const timestampMatch = fileName.match(/(\d{13})/);
+                const timestamp = timestampMatch ? new Date(parseInt(timestampMatch[1])) : new Date();
+                
                 return {
                   key: fileName,
-                  size: 0,
-                  lastModified: new Date().toISOString(),
+                  size: estimatedSize,
+                  lastModified: timestamp.toISOString(),
                   url: `/images/${fileName}`,
                   type: fileName.toLowerCase().includes('.jpg') || fileName.toLowerCase().includes('.jpeg') ? 'image/jpeg' :
                         fileName.toLowerCase().includes('.png') ? 'image/png' :
