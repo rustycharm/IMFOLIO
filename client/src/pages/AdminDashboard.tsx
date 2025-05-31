@@ -11,13 +11,14 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, Users, Image, Settings, Upload, ExternalLink, Check, Star, Brain, Lightbulb, TrendingUp, Clock, Palette, Sparkles, Monitor, HardDrive, Search, FolderOpen } from "lucide-react";
+import { Shield, Users, Image, Settings, Upload, ExternalLink, Check, Star, Brain, Lightbulb, TrendingUp, Clock, Palette, Sparkles, Monitor, HardDrive, Search, FolderOpen, Mail } from "lucide-react";
 import { Link } from "wouter";
 import { ColorPaletteDisplay } from "@/components/ColorPaletteDisplay";
 import CompatibilityDashboard from "@/components/CompatibilityDashboard";
 import { StorageAnalytics } from "@/components/StorageAnalytics";
 import { UserStorageAudit } from "@/components/UserStorageAudit";
 import { ObjectStorageBrowser } from "@/components/ObjectStorageBrowser";
+import AdminMessages from "@/components/AdminMessages";
 
 
 export default function AdminDashboard() {
@@ -487,6 +488,10 @@ export default function AdminDashboard() {
           } as any}>
             <TabsTrigger value="overview" className="whitespace-nowrap flex-shrink-0 min-w-fit">Overview</TabsTrigger>
             <TabsTrigger value="users" className="whitespace-nowrap flex-shrink-0 min-w-fit">Users</TabsTrigger>
+            <TabsTrigger value="messages" className="whitespace-nowrap flex-shrink-0 min-w-fit">
+              <Mail className="w-4 h-4 mr-1" />
+              Messages
+            </TabsTrigger>
             <TabsTrigger value="hero-banners" className="whitespace-nowrap flex-shrink-0 min-w-fit">Hero Banners</TabsTrigger>
             <TabsTrigger value="featured-photos" className="whitespace-nowrap flex-shrink-0 min-w-fit">
               <Star className="w-4 h-4 mr-2" />
@@ -618,6 +623,10 @@ export default function AdminDashboard() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="messages" className="space-y-6">
+          <AdminMessages />
         </TabsContent>
 
         <TabsContent value="hero-banners" className="space-y-6">
