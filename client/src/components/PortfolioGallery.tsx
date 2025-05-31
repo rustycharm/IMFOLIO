@@ -338,8 +338,8 @@ const PortfolioGallery = ({
 
               {/* Monochrome White Template: Mixed Size Grid Layout */}
               {isMonochromeWhiteTemplate && (
-                <div className="monochrome-white-grid max-w-6xl mx-auto px-4">
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="monochrome-white-grid w-full px-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
                     {Array.isArray(displayPhotos) && displayPhotos.length > 0 ? (
                       displayPhotos.map((photo: any, index: number) => (
                         <motion.div
