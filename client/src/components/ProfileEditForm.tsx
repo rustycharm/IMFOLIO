@@ -75,7 +75,7 @@ const ProfileEditForm = ({
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="username" id="url-username" />
             <Label htmlFor="url-username" className="cursor-pointer">
-              Use Username: <span className="text-blue-600 font-mono">/{formData.username || 'your-username'}</span>
+              Use Username: <span className="text-blue-600 font-mono">/{(formData.username || 'your-username').toLowerCase()}</span>
             </Label>
           </div>
           <div className="flex items-center space-x-2">

@@ -471,7 +471,7 @@ export default function Account() {
                     let path = '';
                     switch (urlType) {
                       case 'username':
-                        path = `/${username}`;
+                        path = `/${username?.toLowerCase()}`;
                         break;
                       case 'fullname_dash':
                         path = `/${firstName.toLowerCase()}-${lastName.toLowerCase()}`;
