@@ -341,13 +341,16 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(messages).orderBy(desc(messages.createdAt));
   }
 
-  async createMessage(userId: string, content: string): Promise<Message> {
+  async createMessage(data: {
+    userId?: string;
+    name?: string;
+    email?: string;
+    subject?: string;
+    message: string;
+  }): Promise<Message> {
     const [message] = await db
       .insert(messages)
-      .values({
-        userId,
-        content,
-      })
+      .values(data)
       .returning();
     return message;
   }

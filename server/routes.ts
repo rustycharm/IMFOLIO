@@ -812,20 +812,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const validatedData = contactSchema.parse(req.body);
       
-      // Create a message entry in the database
-      // For contact form, we'll use a special system user ID or create anonymous entry
-      const anonymousUserId = "anonymous"; // We'll need to handle this in the schema
-      const messageContent = JSON.stringify({
+      // Save contact form data to database
+      await storage.createMessage({
         name: validatedData.name,
         email: validatedData.email,
         subject: validatedData.subject,
         message: validatedData.message,
-        timestamp: new Date().toISOString(),
-        source: "contact_form"
       });
-
-      // Save to database
-      await storage.createMessage(anonymousUserId, messageContent);
 
       // Send email notification to admin
       try {

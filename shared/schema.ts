@@ -78,11 +78,15 @@ export const photos = pgTable("photos", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Messages table
+// Messages table - for contact form submissions
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  content: text("content").notNull(),
+  userId: varchar("user_id").references(() => users.id),
+  name: text("name"),
+  email: text("email"),
+  subject: text("subject"),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
