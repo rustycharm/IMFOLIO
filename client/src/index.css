@@ -191,3 +191,146 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: rgba(120, 120, 120, 0.9);
 }
+
+/* Template System CSS Variables */
+:root {
+  /* Default template colors (classic) - preserving current design */
+  --template-primary: #000000;
+  --template-secondary: #ffffff;
+  --template-accent: #f5f5f5;
+  --template-text: #333333;
+  --template-text-light: #666666;
+  --template-background: #ffffff;
+  --template-card-bg: #ffffff;
+  --template-border: #e5e5e5;
+  
+  /* Default typography */
+  --template-font-family: 'Montserrat';
+  --template-heading-weight: 300;
+  --template-body-weight: 400;
+}
+
+/* Classic Template (Default) - Preserves existing design */
+.template-classic {
+  --template-primary: #000000;
+  --template-secondary: #ffffff;
+  --template-accent: #f5f5f5;
+  --template-text: #333333;
+  --template-text-light: #666666;
+  --template-background: #ffffff;
+  --template-card-bg: #ffffff;
+  --template-border: #e5e5e5;
+  --template-heading-weight: 300;
+  --template-body-weight: 400;
+}
+
+/* Monochrome Template */
+.template-monochrome {
+  --template-primary: #000000;
+  --template-secondary: #ffffff;
+  --template-accent: #1a1a1a;
+  --template-text: #ffffff;
+  --template-text-light: #cccccc;
+  --template-background: #000000;
+  --template-card-bg: #111111;
+  --template-border: #333333;
+  --template-heading-weight: 100;
+  --template-body-weight: 300;
+}
+
+/* Portfolio Template Styles - Apply to portfolio pages only */
+.portfolio-template {
+  background-color: var(--template-background);
+  color: var(--template-text);
+  font-family: var(--template-font-family), sans-serif;
+  font-weight: var(--template-body-weight);
+}
+
+.portfolio-template h1,
+.portfolio-template h2,
+.portfolio-template h3,
+.portfolio-template h4,
+.portfolio-template h5,
+.portfolio-template h6 {
+  color: var(--template-text);
+  font-weight: var(--template-heading-weight);
+}
+
+.portfolio-template .hero-section {
+  background-color: var(--template-background);
+  color: var(--template-text);
+}
+
+.portfolio-template .gallery-section {
+  background-color: var(--template-background);
+}
+
+.portfolio-template .image-card {
+  background-color: var(--template-card-bg);
+  border-color: var(--template-border);
+}
+
+.portfolio-template .category-button {
+  color: var(--template-text);
+  border-color: var(--template-border);
+  background-color: var(--template-card-bg);
+}
+
+.portfolio-template .category-button:hover {
+  background-color: var(--template-accent);
+}
+
+.portfolio-template .category-button.active {
+  background-color: var(--template-primary);
+  color: var(--template-secondary);
+  border-color: var(--template-primary);
+}
+
+.portfolio-template .overlay {
+  color: var(--template-secondary);
+}
+
+.portfolio-template .text-light {
+  color: var(--template-text-light);
+}
+
+/* Monochrome Template Specific Styles */
+.template-monochrome .portfolio-template {
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+}
+
+.template-monochrome .hero-section {
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+}
+
+.template-monochrome .image-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(255, 255, 255, 0.1);
+}
+
+.template-monochrome .gallery-section h2 {
+  font-weight: 100;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.template-monochrome .masonry-grid {
+  gap: 1.5rem;
+}
+
+.template-monochrome .category-button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.template-monochrome .category-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.template-monochrome .category-button.active {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}

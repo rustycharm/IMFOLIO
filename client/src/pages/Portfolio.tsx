@@ -3,7 +3,7 @@ import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import CategoryCarousel from "@/components/CategoryCarousel";
 import PortfolioGallery from "@/components/PortfolioGallery";
-import { PhotoResponse } from "@shared/schema";
+import { Photo } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Instagram, Twitter, Mail, Link as LinkIcon } from "lucide-react";
@@ -13,6 +13,7 @@ import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import NotFound from "@/pages/not-found";
 import { PhotoLightbox } from "@/components/PhotoLightbox";
+import { TemplateProvider } from "@/contexts/TemplateContext";
 
 type PhotographerProfile = {
   id: number;
@@ -33,8 +34,8 @@ export default function Portfolio() {
   const { username } = useParams();
   const { user: currentUser, isAuthenticated } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [visiblePhotos, setVisiblePhotos] = useState<PhotoResponse[]>([]);
-  const [selectedPhoto, setSelectedPhoto] = useState<PhotoResponse | null>(null);
+  const [visiblePhotos, setVisiblePhotos] = useState<Photo[]>([]);
+  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   // Fetch photographer profile
@@ -65,7 +66,7 @@ export default function Portfolio() {
       if (!response.ok) {
         throw new Error("Failed to fetch photographer photos");
       }
-      return response.json() as Promise<PhotoResponse[]>;
+      return response.json() as Promise<Photo[]>;
     },
     enabled: !!profile,
   });
