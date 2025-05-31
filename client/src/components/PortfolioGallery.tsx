@@ -336,47 +336,47 @@ const PortfolioGallery = ({
                 </motion.h2>
               )}
 
-              {/* Monochrome White Template: Integrated River Layout */}
+              {/* Monochrome White Template: Column River Layout */}
               {isMonochromeWhiteTemplate && (
-                <div className="monochrome-white-river max-w-4xl mx-auto px-4">
+                <div className="monochrome-white-grid max-w-6xl mx-auto px-4 columns-1 md:columns-2 lg:columns-3 gap-6">
                   {Array.isArray(displayPhotos) && displayPhotos.length > 0 ? (
                     displayPhotos.map((photo: any, index: number) => (
                       <motion.div
                         key={photo.id}
-                        className={`relative overflow-hidden cursor-pointer mb-8 transition-all duration-300 hover:shadow-2xl ${
+                        className={`relative overflow-hidden cursor-pointer mb-6 break-inside-avoid transition-all duration-300 hover:shadow-lg ${
                           photo.isRiverFeatured 
-                            ? 'w-full h-[70vh] shadow-lg' 
-                            : 'w-full h-[40vh]'
+                            ? 'md:col-span-2 lg:col-span-2 shadow-md' 
+                            : ''
                         }`}
                         onClick={() => onPhotoClick(photo, index, displayPhotos)}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ 
                           duration: 0.6,
-                          delay: index * 0.1
+                          delay: index * 0.05
                         }}
                       >
                         <img
                           src={photo.imageUrl}
                           alt={photo.title}
-                          className="w-full h-full object-cover"
+                          className="w-full h-auto object-cover"
                           loading="lazy"
                         />
                         
                         {/* Subtle overlay with title */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
-                          <div className="absolute bottom-0 left-0 right-0 p-6">
-                            <h3 className="text-white text-lg font-light tracking-wide">{photo.title}</h3>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
+                          <div className="absolute bottom-0 left-0 right-0 p-4">
+                            <h3 className="text-white text-sm font-light tracking-wide">{photo.title}</h3>
                             {photo.category && (
-                              <p className="text-white/80 text-sm mt-1">{photo.category}</p>
+                              <p className="text-white/80 text-xs mt-1">{photo.category}</p>
                             )}
                           </div>
                         </div>
 
                         {/* Featured indicator for river featured photos */}
                         {photo.isRiverFeatured && (
-                          <div className="absolute top-4 right-4">
-                            <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                          <div className="absolute top-3 right-3">
+                            <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
                               <span className="text-black text-xs font-medium">FEATURED</span>
                             </div>
                           </div>
@@ -384,7 +384,7 @@ const PortfolioGallery = ({
                       </motion.div>
                     ))
                   ) : (
-                    <div className="text-center py-16">
+                    <div className="text-center py-16 col-span-full">
                       <p className="text-gray-600">
                         {selectedCategory === "all" 
                           ? "No photos to display." 
