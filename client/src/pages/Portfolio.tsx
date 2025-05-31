@@ -501,13 +501,13 @@ function PortfolioInner() {
         <div className="epic-gallery epic-section">
           <div className="container mx-auto px-8">
             {/* About section for Epic template */}
-            {profile.bio && (
+            {profile.aboutMe && (
               <div className="text-center mb-20">
                 <h2 className="text-5xl font-semibold text-gray-900 mb-8 leading-tight">
                   About the Artist
                 </h2>
                 <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-                  {profile.bio}
+                  {profile.aboutMe}
                 </p>
               </div>
             )}
@@ -533,33 +533,35 @@ function PortfolioInner() {
                 <div className="col-span-full text-center py-20">
                   <p className="text-xl text-gray-500">Unable to load photos. Please try again later.</p>
                 </div>
-              ) : filteredPhotos.length === 0 ? (
+              ) : photos.length === 0 ? (
                 <div className="col-span-full text-center py-20">
                   <p className="text-xl text-gray-500">No photos found for this category.</p>
                 </div>
               ) : (
-                filteredPhotos.map((photo: any, index: number) => (
-                  <div
-                    key={photo.id}
-                    className="epic-card cursor-pointer group"
-                    onClick={() => openLightbox(photo, index, filteredPhotos)}
-                  >
-                    <div className="aspect-[4/3] overflow-hidden">
-                      <img
-                        src={photo.imageUrl}
-                        alt={photo.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        loading="lazy"
-                      />
+                photos
+                  .filter(photo => !selectedCategory || selectedCategory === 'all' || photo.category === selectedCategory)
+                  .map((photo: any, index: number) => (
+                    <div
+                      key={photo.id}
+                      className="epic-card cursor-pointer group"
+                      onClick={() => handlePhotoClick(photo, index)}
+                    >
+                      <div className="aspect-[4/3] overflow-hidden">
+                        <img
+                          src={photo.imageUrl}
+                          alt={photo.title}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="p-6">
+                        <h3 className="font-semibold text-lg text-gray-900 mb-2">{photo.title}</h3>
+                        {photo.description && (
+                          <p className="text-gray-600 text-sm leading-relaxed">{photo.description}</p>
+                        )}
+                      </div>
                     </div>
-                    <div className="p-6">
-                      <h3 className="font-semibold text-lg text-gray-900 mb-2">{photo.title}</h3>
-                      {photo.description && (
-                        <p className="text-gray-600 text-sm leading-relaxed">{photo.description}</p>
-                      )}
-                    </div>
-                  </div>
-                ))
+                  ))
               )}
             </div>
           </div>
@@ -577,34 +579,36 @@ function PortfolioInner() {
 
           {/* Photo Gallery - For non-Epic templates */}
           <div className="gallery-section container mx-auto px-4 pb-16 overflow-hidden">
-        {isPhotosLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="aspect-square">
-                <Skeleton className="w-full h-full" />
+            {isPhotosLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="aspect-square">
+                    <Skeleton className="w-full h-full" />
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : photosError || !photos ? (
+              <div className="text-center py-12">
+                <p className="text-gray-600">
+                  Unable to load photos. Please try again later.
+                </p>
+              </div>
+            ) : photos.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-600">No photos to display.</p>
+              </div>
+            ) : (
+              <PortfolioGallery
+                selectedCategory={selectedCategory}
+                onPhotoClick={handlePhotoClick}
+                setVisiblePhotos={setVisiblePhotos}
+                photos={photos}
+                isLoading={isPhotosLoading}
+              />
+            )}
           </div>
-        ) : photosError || !photos ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">
-              Unable to load photos. Please try again later.
-            </p>
-          </div>
-        ) : photos.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">No photos to display.</p>
-          </div>
-        ) : (
-          <PortfolioGallery
-            selectedCategory={selectedCategory}
-            onPhotoClick={handlePhotoClick}
-            setVisiblePhotos={setVisiblePhotos}
-            photos={photos}
-            isLoading={isPhotosLoading}
-          />
-        )}
-      </div>
+        </>
+      )}
 
       {/* About Section - Hidden for monochrome template */}
       {currentTemplate?.id !== 'monochrome' && <About />}
