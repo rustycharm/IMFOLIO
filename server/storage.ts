@@ -71,7 +71,13 @@ export interface IStorage {
 
   // Message operations
   getAllMessages(): Promise<Message[]>;
-  createMessage(userId: string, content: string): Promise<Message>;
+  createMessage(data: {
+    userId?: string;
+    name?: string;
+    email?: string;
+    subject?: string;
+    message: string;
+  }): Promise<Message>;
 
   // Profile operations
   getProfile(userId: string): Promise<Profile | undefined>;
