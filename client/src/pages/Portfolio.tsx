@@ -325,7 +325,7 @@ function PortfolioInner() {
       )}
 
       {/* Category Selection */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4">
         <CategoryCarousel
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
