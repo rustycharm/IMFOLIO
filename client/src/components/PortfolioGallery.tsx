@@ -81,7 +81,7 @@ const PortfolioGallery = ({
   };
 
   return (
-    <section className="pt-8 pb-24" id="gallery">
+    <section className="pb-24" id="gallery">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Show title at top for classic template */}
         {!isMonochromeTemplate && (
@@ -187,7 +187,7 @@ const PortfolioGallery = ({
               
               {/* Monochrome Template: Featured Spotlight Layout */}
               {isMonochromeTemplate && featuredPhotos.length > 0 && (
-                <div className="monochrome-featured-section mb-16 mt-6">
+                <div className="monochrome-featured-section mb-16 mt-8">
                   <motion.h3 
                     className="text-3xl font-thin text-center mb-8 tracking-widest uppercase"
                     initial={{ opacity: 0, y: 20 }}
