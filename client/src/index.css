@@ -744,37 +744,33 @@ body:has(.template-monochrome) {
 }
 
 .template-monochrome-white .monochrome-white-hero {
+  background: linear-gradient(135deg, #e5e7eb 0%, #f9fafb 30%, #ffffff 60%, #f3f4f6 100%);
   position: relative;
+  overflow: hidden;
 }
 
 .template-monochrome-white .monochrome-white-hero::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.9) 0%, 
-    rgba(248, 249, 250, 0.7) 25%,
-    rgba(255, 255, 255, 0.5) 50%,
-    rgba(241, 243, 244, 0.7) 75%,
-    rgba(255, 255, 255, 0.9) 100%
-  );
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: radial-gradient(circle at 50% 50%, rgba(156, 163, 175, 0.15) 0%, transparent 70%);
   pointer-events: none;
-  z-index: 1;
 }
 
 .template-monochrome-white .monochrome-white-hero::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 30% 70%, 
-    rgba(229, 231, 235, 0.4) 0%, 
-    transparent 60%
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.6) 0%, 
+    rgba(248, 250, 252, 0.4) 25%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(241, 245, 249, 0.4) 75%,
+    rgba(255, 255, 255, 0.6) 100%
   );
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   pointer-events: none;
-  z-index: 2;
 }
 
 /* Ensure content appears above glass effect */
