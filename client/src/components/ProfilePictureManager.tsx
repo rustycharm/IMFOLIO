@@ -1,11 +1,11 @@
 import { useState, useRef } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, User, Camera } from "lucide-react";
+import { Upload, User, Camera, Check } from "lucide-react";
 
 export default function ProfilePictureManager() {
   const { toast } = useToast();
@@ -222,26 +222,124 @@ export default function ProfilePictureManager() {
       </Card>
 
       {/* Alternative: Use Portfolio Photo */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Alternative Option</CardTitle>
-          <CardDescription>
-            You can also use one of your portfolio photos as your profile picture
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      <PhotoSelector />
+    </div>
+  );
+}
+
+function PhotoSelector() {
+  const { toast } = useToast();
+  const [showPhotoGrid, setShowPhotoGrid] = useState(false);
+  
+  // Fetch user's photos
+  const { data: photos, isLoading } = useQuery({
+    queryKey: ['/api/user/photos'],
+    enabled: showPhotoGrid
+  });
+
+  // Set photo as profile picture mutation
+  const setAsProfilePicMutation = useMutation({
+    mutationFn: async (photoId: number) => {
+      return apiRequest('/api/user/profile-image/set-custom', {
+        method: 'POST',
+        body: JSON.stringify({ photoId })
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Profile Picture Updated",
+        description: "Selected photo is now your profile picture.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      setShowPhotoGrid(false);
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to set photo as profile picture. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handlePhotoSelect = (photoId: number) => {
+    setAsProfilePicMutation.mutate(photoId);
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Use Existing Photo</CardTitle>
+        <CardDescription>
+          Choose one of your uploaded photos as your profile picture
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {!showPhotoGrid ? (
           <Button 
             variant="outline" 
-            onClick={() => window.location.href = '/my-photos'}
+            onClick={() => setShowPhotoGrid(true)}
             className="w-full"
           >
             Choose from My Photos
           </Button>
-          <p className="text-xs text-gray-500 mt-2 text-center">
-            Visit your photo collection to select an existing photo as your profile picture
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h4 className="font-medium">Select a Photo</h4>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowPhotoGrid(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+            
+            {isLoading ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Loading your photos...</p>
+              </div>
+            ) : photos && photos.length > 0 ? (
+              <div className="grid grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+                {photos.map((photo: any) => (
+                  <div 
+                    key={photo.id}
+                    className="relative group cursor-pointer"
+                    onClick={() => handlePhotoSelect(photo.id)}
+                  >
+                    <img 
+                      src={photo.imageUrl} 
+                      alt={photo.title}
+                      className="w-full h-24 object-cover rounded-lg hover:opacity-80 transition-opacity"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-all">
+                      <Check className="w-6 h-6 text-white opacity-0 group-hover:opacity-100" />
+                    </div>
+                    {setAsProfilePicMutation.isPending && (
+                      <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No photos found. Upload some photos first.</p>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.href = '/my-photos'}
+                  className="mt-2"
+                >
+                  Upload Photos
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
