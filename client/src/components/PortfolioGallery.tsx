@@ -83,14 +83,17 @@ const PortfolioGallery = ({
   return (
     <section className="pt-8 pb-24" id="gallery">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.h2 
-          className="text-2xl font-light tracking-wide uppercase mb-12 text-center"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-        >
-          {selectedCategory === "all" ? "All Work" : selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)}
-        </motion.h2>
+        {/* Show title at top for classic template */}
+        {!isMonochromeTemplate && (
+          <motion.h2 
+            className="text-2xl font-light tracking-wide uppercase mb-12 text-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            {selectedCategory === "all" ? "All Work" : selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)}
+          </motion.h2>
+        )}
         
         {isLoading ? (
           <>
@@ -276,6 +279,19 @@ const PortfolioGallery = ({
                     </div>
                   )}
                 </div>
+              )}
+
+              {/* Title for monochrome template - above photo river */}
+              {isMonochromeTemplate && (
+                <motion.h2 
+                  className="text-3xl font-thin tracking-widest uppercase mb-12 text-center text-white"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8 }}
+                >
+                  {selectedCategory === "all" ? "All Work" : selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)}
+                </motion.h2>
               )}
 
               {/* Gallery grid */}

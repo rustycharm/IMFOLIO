@@ -163,7 +163,7 @@ function PortfolioInner() {
       
       {/* Monochrome Template: Column-based Hero */}
       {currentTemplate?.id === 'monochrome' ? (
-        <div className="monochrome-hero-section py-4 px-4">
+        <div className="monochrome-hero-section pt-8 pb-4 px-4">
           <div className="container mx-auto max-w-4xl">
             <div className="flex flex-col items-center text-center space-y-4">
               
