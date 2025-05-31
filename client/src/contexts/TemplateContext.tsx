@@ -29,7 +29,12 @@ interface TemplateProviderProps {
 
 export const TemplateProvider = ({ children }: TemplateProviderProps) => {
   const { user, isAuthenticated } = useAuth();
-  const [currentTemplate, setCurrentTemplate] = useState<PortfolioTemplate | null>(null);
+  const [currentTemplate, setCurrentTemplate] = useState<PortfolioTemplate | null>({
+    id: 'classic',
+    name: 'Classic',
+    description: 'Traditional portfolio layout',
+    preview: '/images/templates/classic-preview.jpg'
+  });
 
   // Fetch user's template selection
   const { 
