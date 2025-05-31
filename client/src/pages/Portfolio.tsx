@@ -161,33 +161,45 @@ function PortfolioInner() {
   return (
     <div className={`min-h-screen portfolio-template ${currentTemplate?.id ? `template-${currentTemplate.id}` : 'template-classic'}`}>
       
-      {/* Monochrome White Template: Single Column Hero */}
+      {/* Monochrome White Template: Portrait Hero */}
       {currentTemplate?.id === 'monochrome-white' ? (
-        <div className="monochrome-white-hero min-h-[40vh] bg-gradient-to-b from-gray-100 to-white px-4 py-12">
-          <div className="container mx-auto max-w-4xl h-full">
-            <div className="flex flex-col items-center text-center space-y-6">
+        <div className="monochrome-white-hero relative min-h-[50vh] bg-gradient-to-b from-gray-100 to-white overflow-hidden">
+          <div className="container mx-auto h-full px-8 py-16 relative z-10">
+            <div className="flex items-center space-x-8 max-w-4xl">
               
-              {/* Dominant Profile Picture */}
-              <div className="w-48 h-48 rounded-full overflow-hidden border border-gray-200 shadow-lg">
-                {profile.profileImage ? (
-                  <img 
-                    src={profile.profileImage} 
-                    alt={displayName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                    <Camera className="w-12 h-12 text-gray-400" />
-                  </div>
-                )}
+              {/* Portrait Profile Picture with Blur Effect */}
+              <div className="relative">
+                <div className="w-48 h-64 overflow-hidden shadow-2xl relative">
+                  {profile.profileImage ? (
+                    <>
+                      <img 
+                        src={profile.profileImage} 
+                        alt={displayName}
+                        className="w-full h-full object-cover"
+                      />
+                      {/* Blur overlay extending to background */}
+                      <div 
+                        className="absolute inset-0 bg-cover bg-center opacity-30 blur-xl scale-150 -z-10"
+                        style={{ 
+                          backgroundImage: `url(${profile.profileImage})`,
+                          transform: 'scale(2) translateX(50%)'
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <Camera className="w-16 h-16 text-gray-400" />
+                    </div>
+                  )}
+                </div>
               </div>
               
-              {/* Name underneath */}
-              <div>
-                <h1 className="text-4xl font-light text-gray-900 tracking-wide">
+              {/* Text Content - Left Aligned */}
+              <div className="flex-1 text-left">
+                <h1 className="text-5xl font-light text-gray-900 tracking-wide leading-tight">
                   {displayName}
                 </h1>
-                <p className="text-lg text-gray-600 mt-2">
+                <p className="text-xl text-gray-600 mt-4 font-light">
                   {profile.tagline}
                 </p>
               </div>
