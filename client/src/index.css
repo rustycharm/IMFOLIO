@@ -656,7 +656,7 @@
 }
 
 .template-epic .epic-hero h1 {
-  font-size: clamp(3rem, 8vw, 8rem);
+  font-size: clamp(2rem, 5vw, 4rem);
   font-weight: var(--template-heading-weight);
   color: white;
   letter-spacing: -0.02em;
@@ -667,7 +667,7 @@
 }
 
 .template-epic .epic-hero p {
-  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-size: clamp(1rem, 2vw, 1.4rem);
   color: rgba(255, 255, 255, 0.9);
   font-weight: 400;
   letter-spacing: 0.01em;
@@ -763,7 +763,7 @@
 }
 
 .template-epic .epic-photo-title {
-  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-size: clamp(1.2rem, 2.5vw, 2rem);
   font-weight: var(--template-heading-weight);
   color: white;
   margin-bottom: 0.5rem;
