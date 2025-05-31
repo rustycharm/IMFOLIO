@@ -81,32 +81,72 @@ function createExternalTransporter() {
 
 export async function sendContactNotification(params: ContactEmailParams): Promise<boolean> {
   try {
-    // Create formatted email content
+    // Create formatted email content with IMFOLIO branding
     const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px;">
-          New Contact Form Submission
-        </h2>
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <p><strong>From:</strong> ${params.name}</p>
-          <p><strong>Email:</strong> <a href="mailto:${params.email}">${params.email}</a></p>
-          <p><strong>Subject:</strong> ${params.subject}</p>
-          <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+        <!-- IMFOLIO Header -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 2px;">
+            IMFOLIO
+          </h1>
+          <p style="color: #e8f4f8; margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">
+            Professional Photography Portfolio Platform
+          </p>
         </div>
-        <div style="background: #fff; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-          <h3 style="color: #555; margin-top: 0;">Message:</h3>
-          <div style="line-height: 1.6; color: #333;">
-            ${params.message.replace(/\n/g, '<br>')}
+        
+        <!-- Content -->
+        <div style="padding: 40px 30px;">
+          <h2 style="color: #333; margin: 0 0 25px 0; font-size: 22px; font-weight: 500;">
+            New Contact Form Submission
+          </h2>
+          
+          <!-- Contact Details -->
+          <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #667eea;">
+            <div style="margin-bottom: 15px;">
+              <span style="font-weight: 600; color: #555;">From:</span> 
+              <span style="color: #333;">${params.name}</span>
+            </div>
+            <div style="margin-bottom: 15px;">
+              <span style="font-weight: 600; color: #555;">Email:</span> 
+              <a href="mailto:${params.email}" style="color: #667eea; text-decoration: none;">${params.email}</a>
+            </div>
+            <div style="margin-bottom: 15px;">
+              <span style="font-weight: 600; color: #555;">Subject:</span> 
+              <span style="color: #333;">${params.subject}</span>
+            </div>
+            <div>
+              <span style="font-weight: 600; color: #555;">Time:</span> 
+              <span style="color: #333;">${new Date().toLocaleString()}</span>
+            </div>
+          </div>
+          
+          <!-- Message Content -->
+          <div style="background: #fff; padding: 25px; border: 1px solid #e9ecef; border-radius: 8px;">
+            <h3 style="color: #555; margin: 0 0 15px 0; font-size: 16px; font-weight: 600;">Message:</h3>
+            <div style="line-height: 1.6; color: #333; font-size: 15px;">
+              ${params.message.replace(/\n/g, '<br>')}
+            </div>
+          </div>
+          
+          <!-- Reply Notice -->
+          <div style="margin-top: 30px; padding: 20px; background: #e8f4f8; border-radius: 6px;">
+            <p style="margin: 0; color: #666; font-size: 13px; text-align: center;">
+              Reply directly to this email to respond to <strong>${params.name}</strong>
+            </p>
           </div>
         </div>
-        <p style="color: #666; font-size: 12px; margin-top: 20px;">
-          <em>This message was sent through your portfolio contact form. Reply directly to respond to the sender.</em>
-        </p>
+        
+        <!-- IMFOLIO Footer -->
+        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e9ecef;">
+          <p style="margin: 0; color: #999; font-size: 12px;">
+            Powered by <strong style="color: #667eea;">IMFOLIO.COM</strong> - Professional Photography Portfolio Platform
+          </p>
+        </div>
       </div>
     `;
 
     const textContent = `
-New Contact Form Submission
+IMFOLIO - New Contact Form Submission
 
 From: ${params.name}
 Email: ${params.email}
@@ -116,14 +156,49 @@ Time: ${new Date().toLocaleString()}
 Message:
 ${params.message}
 
-This message was sent through your portfolio contact form.
+Reply directly to this email to respond to ${params.name}.
+
+---
+Powered by IMFOLIO.COM - Professional Photography Portfolio Platform
     `;
 
-    // Store in local email service
+    // Try to send real email first (if external credentials are configured)
+    const externalTransporter = createExternalTransporter();
+    
+    if (externalTransporter) {
+      try {
+        await externalTransporter.sendMail({
+          from: '"IMFOLIO Contact Form" <noreply@imfolio.com>',
+          to: params.adminEmail,
+          replyTo: params.email,
+          subject: `IMFOLIO Contact: ${params.subject}`,
+          text: textContent,
+          html: htmlContent,
+        });
+        
+        console.log(`📧 Real email sent successfully to ${params.adminEmail}`);
+        
+        // Also store in local service for admin dashboard viewing
+        localEmailService.addEmail({
+          from: `${params.name} <${params.email}>`,
+          to: params.adminEmail,
+          subject: `IMFOLIO Contact: ${params.subject}`,
+          html: htmlContent,
+          text: textContent
+        });
+        
+        return true;
+      } catch (externalError) {
+        console.warn(`Failed to send external email to ${params.adminEmail}:`, externalError);
+        // Fall through to local storage only
+      }
+    }
+
+    // If external email failed or not configured, store in local service only
     const emailId = localEmailService.addEmail({
       from: `${params.name} <${params.email}>`,
       to: params.adminEmail,
-      subject: `Contact Form: ${params.subject}`,
+      subject: `IMFOLIO Contact: ${params.subject}`,
       html: htmlContent,
       text: textContent
     });
@@ -133,7 +208,7 @@ This message was sent through your portfolio contact form.
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log(`📬 To: ${params.adminEmail}`);
     console.log(`👤 From: ${params.name} (${params.email})`);
-    console.log(`📝 Subject: Contact Form: ${params.subject}`);
+    console.log(`📝 Subject: IMFOLIO Contact: ${params.subject}`);
     console.log(`🆔 Email ID: ${emailId}`);
     console.log(`⏰ Time: ${new Date().toLocaleString()}`);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -141,18 +216,6 @@ This message was sent through your portfolio contact form.
     console.log(params.message);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('📥 Email stored locally - check admin dashboard for full details\n');
-
-    // Try to send external email if configured
-    const externalTransporter = createExternalTransporter();
-    if (externalTransporter) {
-      try {
-        await externalTransporter.sendMail({
-          from: process.env.GMAIL_USER,
-          to: params.adminEmail,
-          replyTo: params.email,
-          subject: `Contact Form: ${params.subject}`,
-          html: htmlContent,
-          text: textContent,
         });
         console.log(`✅ External email notification also sent to ${params.adminEmail}`);
       } catch (externalError) {

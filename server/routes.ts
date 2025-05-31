@@ -820,22 +820,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: validatedData.message,
       });
 
-      // Send email notification to admin
+      // Send email notification to ALL administrators
       try {
-        const adminUsers = await storage.getAllUsers();
-        const admin = adminUsers.find(user => user.role === 'admin');
+        const allUsers = await storage.getAllUsers();
+        const adminUsers = allUsers.filter(user => user.role === 'admin' && user.email);
         
-        if (admin && admin.email) {
-          await sendContactNotification({
-            name: validatedData.name,
-            email: validatedData.email,
-            subject: validatedData.subject,
-            message: validatedData.message,
-            adminEmail: admin.email
-          });
+        console.log(`📧 Found ${adminUsers.length} administrator(s) to notify`);
+        
+        // Send email to each administrator
+        for (const admin of adminUsers) {
+          try {
+            await sendContactNotification({
+              name: validatedData.name,
+              email: validatedData.email,
+              subject: validatedData.subject,
+              message: validatedData.message,
+              adminEmail: admin.email!
+            });
+            console.log(`✅ Email notification sent to admin: ${admin.email}`);
+          } catch (individualEmailError) {
+            console.warn(`❌ Failed to send email to admin ${admin.email}:`, individualEmailError);
+          }
+        }
+        
+        if (adminUsers.length === 0) {
+          console.warn("⚠️ No administrators found with email addresses to notify");
         }
       } catch (emailError) {
-        console.warn("Failed to send email notification:", emailError);
+        console.warn("Failed to fetch admin users for email notification:", emailError);
         // Don't fail the request if email fails
       }
 
