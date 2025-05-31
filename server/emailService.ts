@@ -60,18 +60,16 @@ class LocalEmailService extends EventEmitter {
 const localEmailService = new LocalEmailService();
 
 function createExternalTransporter() {
-  // Create direct SMTP transporter for real email delivery
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
+    return null;
+  }
+
   return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
+    service: 'gmail',
     auth: {
-      user: process.env.GMAIL_USER || 'noreply@imfolio.com',
-      pass: process.env.GMAIL_PASS || 'defaultpass'
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS,
     },
-    tls: {
-      rejectUnauthorized: false
-    }
   });
 }
 
@@ -158,34 +156,36 @@ Reply directly to this email to respond to ${params.name}.
 Powered by IMFOLIO.COM - Professional Photography Portfolio Platform
     `;
 
-    // Send email using local SMTP service
-    const smtpService = createExternalTransporter();
+    // Try to send real email first (if Gmail credentials are configured)
+    const externalTransporter = createExternalTransporter();
     
-    try {
-      await smtpService.sendEmail({
-        from: '"IMFOLIO Contact Form" <noreply@imfolio.com>',
-        to: params.adminEmail,
-        replyTo: params.email,
-        subject: `IMFOLIO Contact: ${params.subject}`,
-        text: textContent,
-        html: htmlContent,
-      });
-      
-      console.log(`📧 IMFOLIO branded email sent successfully to ${params.adminEmail}`);
-      
-      // Also store in local service for admin dashboard viewing
-      localEmailService.addEmail({
-        from: `${params.name} <${params.email}>`,
-        to: params.adminEmail,
-        subject: `IMFOLIO Contact: ${params.subject}`,
-        html: htmlContent,
-        text: textContent
-      });
-      
-      return true;
-    } catch (emailError) {
-      console.warn(`Failed to send IMFOLIO email to ${params.adminEmail}:`, emailError);
-      // Fall through to local storage only
+    if (externalTransporter) {
+      try {
+        await externalTransporter.sendMail({
+          from: '"IMFOLIO Contact Form" <noreply@imfolio.com>',
+          to: params.adminEmail,
+          replyTo: params.email,
+          subject: `IMFOLIO Contact: ${params.subject}`,
+          text: textContent,
+          html: htmlContent,
+        });
+        
+        console.log(`📧 Real IMFOLIO email sent successfully to ${params.adminEmail}`);
+        
+        // Also store in local service for admin dashboard viewing
+        localEmailService.addEmail({
+          from: `${params.name} <${params.email}>`,
+          to: params.adminEmail,
+          subject: `IMFOLIO Contact: ${params.subject}`,
+          html: htmlContent,
+          text: textContent
+        });
+        
+        return true;
+      } catch (externalError) {
+        console.warn(`Failed to send external email to ${params.adminEmail}:`, externalError);
+        // Fall through to local storage only
+      }
     }
 
     // If external email failed or not configured, store in local service only
