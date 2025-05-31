@@ -316,73 +316,101 @@ function PortfolioInner() {
           </div>
         </div>
       ) : (
-        /* Classic Template Hero */
-        <div
-          className="hero-section relative w-full h-[60vh] bg-cover bg-center"
-          style={{
-            backgroundImage: `url(${heroImageData?.url || (profile?.heroImage ? `/api/hero-images/user/${profile.id}` : '')})`,
-          }}
-        >
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-white px-4">
-          <div className="flex flex-col items-center max-w-3xl text-center">
-            <div className="w-24 h-24 border-2 border-white mb-6 rounded-full overflow-hidden bg-primary/20 flex items-center justify-center">
-              {profile.profileImage ? (
-                <img 
-                  src={profile.profileImage} 
-                  alt={displayName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <Camera className="w-8 h-8 text-white" />
-              )}
-            </div>
-            
-            <h1 className="text-4xl md:text-5xl font-light tracking-wider mb-2">
-              {displayName}
-            </h1>
-            
-            <h2 className="text-xl md:text-2xl font-extralight tracking-widest mb-6">
-              {profile.tagline || "PHOTOGRAPHY PORTFOLIO"}
-            </h2>
-            
-            <div className="flex space-x-4 mt-2">
-              {profile.instagram && (
-                <a 
-                  href={profile.instagram.startsWith('http') ? profile.instagram : `https://instagram.com/${profile.instagram}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                  className="text-white hover:text-primary-300 transition-colors"
-                >
-                  <Instagram className="w-6 h-6" />
-                </a>
-              )}
-              {profile.twitter && (
-                <a 
-                  href={profile.twitter.startsWith('http') ? profile.twitter : `https://twitter.com/${profile.twitter}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  aria-label="Twitter"
-                  className="text-white hover:text-primary-300 transition-colors"
-                >
-                  <Twitter className="w-6 h-6" />
-                </a>
-              )}
-              {profile.website && (
-                <a 
-                  href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  aria-label="Website"
-                  className="text-white hover:text-primary-300 transition-colors"
-                >
-                  <Globe className="w-6 h-6" />
-                </a>
-              )}
+        /* Classic Template Hero - Same styling as home page */
+        <section className="hero-section h-screen min-h-[100dvh] relative flex items-end justify-center">
+          {/* Mobile-first background with Tailwind utilities */}
+          <div 
+            className={`absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-500 ${
+              isHeroLoading ? 'opacity-0' : 'opacity-100'
+            } md:bg-fixed`} 
+            style={{ 
+              backgroundImage: heroImageData?.url ? `url("${heroImageData.url}")` : 'none',
+            }}
+          >
+            {/* Mobile-first gradient overlay using Tailwind */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20 sm:from-black/70 sm:via-black/20 sm:to-transparent"></div>
+          </div>
+
+          {/* Container with mobile-first spacing */}
+          <div className="container relative z-10 mb-12 sm:mb-16 px-4 sm:px-6 lg:px-8 w-full">
+            <div 
+              className="max-w-5xl mx-auto text-center"
+            >
+              {/* Profile picture positioned above the text */}
+              <div className="flex justify-center mb-6 sm:mb-8">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 border-2 border-white rounded-full overflow-hidden bg-primary/20 flex items-center justify-center">
+                  {profile.profileImage ? (
+                    <img 
+                      src={profile.profileImage} 
+                      alt={displayName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Camera className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                  )}
+                </div>
+              </div>
+              
+              {/* Mobile-first typography with proper Tailwind breakpoints */}
+              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-white mb-3 sm:mb-4 tracking-tight leading-tight">
+                {displayName}
+              </h1>
+              <p className="text-white/90 text-sm xs:text-base sm:text-lg md:text-xl mb-6 sm:mb-8 md:mb-12 font-light px-2 sm:px-0 leading-relaxed">
+                {profile.tagline || "PHOTOGRAPHY PORTFOLIO"}
+              </p>
+              
+              {/* Social links */}
+              <div className="flex justify-center space-x-6 mt-8">
+                {profile.instagram && (
+                  <a 
+                    href={profile.instagram.startsWith('http') ? profile.instagram : `https://instagram.com/${profile.instagram}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                    className="text-white/80 hover:text-white transition-colors duration-300"
+                  >
+                    <Instagram className="w-6 h-6" />
+                  </a>
+                )}
+                {profile.twitter && (
+                  <a 
+                    href={profile.twitter.startsWith('http') ? profile.twitter : `https://twitter.com/${profile.twitter}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    aria-label="Twitter"
+                    className="text-white/80 hover:text-white transition-colors duration-300"
+                  >
+                    <Twitter className="w-6 h-6" />
+                  </a>
+                )}
+                {profile.website && (
+                  <a 
+                    href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    aria-label="Website"
+                    className="text-white/80 hover:text-white transition-colors duration-300"
+                  >
+                    <Globe className="w-6 h-6" />
+                  </a>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        </div>
+
+          {/* Scroll indicator */}
+          <div className="absolute bottom-6 sm:bottom-8 left-1/2 z-20 opacity-70 hover:opacity-100 transition-opacity touch-target" 
+            style={{
+              transform: 'translate(-50%, 0)',
+              willChange: 'transform'
+            }}>
+            <a href="#gallery" className="text-white block p-2" aria-label="Scroll to gallery">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
+              </svg>
+            </a>
+          </div>
+        </section>
       )}
 
       {/* About Section - Only for Classic Template */}
