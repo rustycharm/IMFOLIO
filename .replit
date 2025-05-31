@@ -81,34 +81,5 @@ args = "echo \"Starting IMFOLIO with clean environment...\""
 task = "shell.exec"
 args = "npm run dev"
 
-[[workflows.workflow]]
-name = "Debug and Fix IMFOLIO"
-author = 42860524
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "echo \"🧹 Cleaning up any existing processes...\""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "pkill -f \"node|tsx\" || true"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "echo \"🔍 Running schema fix check...\""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npx tsx server/fix-schema-issues.ts"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "echo \"🚀 Starting IMFOLIO with clean environment...\""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
-
 [objectStorage]
 defaultBucketID = "replit-objstore-faab6733-3159-48ee-a5bd-d75d3f058dd1"
