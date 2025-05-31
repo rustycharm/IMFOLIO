@@ -1,10 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Mail, Clock, User, MessageSquare } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Mail, Clock, User, MessageSquare, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 interface ContactMessage {
   id: number;
@@ -16,9 +19,40 @@ interface ContactMessage {
 }
 
 export default function AdminMessages() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
   const { data: messages, isLoading, error } = useQuery({
     queryKey: ["/api/messages"],
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (messageId: number) => {
+      return apiRequest(`/api/messages/${messageId}`, {
+        method: "DELETE"
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+      toast({
+        title: "Message Deleted",
+        description: "The message has been successfully removed.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete the message. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDelete = (messageId: number, senderName: string) => {
+    if (window.confirm(`Are you sure you want to delete the message from ${senderName}? This action cannot be undone.`)) {
+      deleteMutation.mutate(messageId);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -88,7 +122,7 @@ export default function AdminMessages() {
                   <Card key={message.id} className="border-l-4 border-l-blue-500">
                     <CardContent className="pt-4">
                       <div className="flex items-start justify-between mb-3">
-                        <div className="space-y-1">
+                        <div className="space-y-1 flex-1">
                           <h4 className="font-semibold text-lg">{message.subject || 'No Subject'}</h4>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <User className="w-4 h-4" />
@@ -97,9 +131,20 @@ export default function AdminMessages() {
                             <span>{message.email || 'No email provided'}</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <Clock className="w-4 h-4" />
-                          <span>{format(new Date(message.createdAt), 'MMM d, yyyy h:mm a')}</span>
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <Clock className="w-4 h-4" />
+                            <span>{format(new Date(message.createdAt), 'MMM d, yyyy h:mm a')}</span>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(message.id, message.name || 'Unknown')}
+                            disabled={deleteMutation.isPending}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </div>
                       <Separator className="mb-3" />

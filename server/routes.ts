@@ -878,6 +878,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete a contact message (admin only)
+  app.delete("/api/messages/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      
+      if (isNaN(messageId)) {
+        return res.status(400).json({ message: "Invalid message ID" });
+      }
+
+      const deleted = await storage.deleteMessage(messageId);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+
+      res.json({ success: true, message: "Message deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      res.status(500).json({ message: "Failed to delete message" });
+    }
+  });
+
 
 
   // Helper function to generate portfolio URL based on user preference

@@ -78,6 +78,7 @@ export interface IStorage {
     subject?: string;
     message: string;
   }): Promise<Message>;
+  deleteMessage(messageId: number): Promise<boolean>;
 
   // Profile operations
   getProfile(userId: string): Promise<Profile | undefined>;
@@ -359,6 +360,14 @@ export class DatabaseStorage implements IStorage {
       .values(data)
       .returning();
     return message;
+  }
+
+  async deleteMessage(messageId: number): Promise<boolean> {
+    const result = await db
+      .delete(messages)
+      .where(eq(messages.id, messageId))
+      .returning();
+    return result.length > 0;
   }
 
   // Profile operations
