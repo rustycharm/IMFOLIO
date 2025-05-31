@@ -5,6 +5,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { pool } from "./db";
 import { createHeroImagesTable } from "./migrations/create-hero-images";
 import { addDefaultToHeroImages } from "./migrations/add-default-to-hero-images";
+import { localSMTPService } from "./localSMTP";
 // Removed conflicting authentication import
 
 const app = express();
