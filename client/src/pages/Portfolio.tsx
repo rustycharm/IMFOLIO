@@ -264,7 +264,7 @@ function PortfolioInner() {
       </div>
 
       {/* Photo Gallery */}
-      <div className="gallery-section container mx-auto px-4 pb-16">
+      <div className="gallery-section container mx-auto px-4 pb-16 overflow-hidden">
         {isPhotosLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[...Array(8)].map((_, i) => (

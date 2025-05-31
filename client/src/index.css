@@ -123,6 +123,8 @@
   column-fill: balance;
   orphans: 1;
   widows: 1;
+  overflow: hidden;
+  contain: layout style;
 }
 
 @media (min-width: 640px) {
