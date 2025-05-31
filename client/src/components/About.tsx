@@ -53,9 +53,9 @@ const About = ({ isLoggedIn = false }: AboutProps) => {
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
                 <h2 className="playfair text-3xl font-bold mb-6">About Me</h2>
-                {user.profile?.bio ? (
+                {(user as any).bio ? (
                   <div className="text-gray-700 mb-6 whitespace-pre-line">
-                    {user.profile.bio}
+                    {(user as any).bio}
                   </div>
                 ) : (
                   <>
