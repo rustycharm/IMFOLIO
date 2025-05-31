@@ -166,14 +166,18 @@ const Hero = ({ selectedCategory, onCategoryChange }: HeroProps) => {
       : 'IMFOLIO.COM');
 
   return (
-    <section className="h-screen min-h-[100dvh] relative flex items-end justify-center">
-      {/* Mobile-first background with Tailwind utilities */}
+    <section className="relative flex items-end justify-center min-h-[600px] h-screen max-h-[100vh] sm:min-h-[700px] md:min-h-[800px]">
+      {/* Mobile-optimized background with proper scaling */}
       <div 
         className={`absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-500 ${
           isLoading ? 'opacity-0' : 'opacity-100'
-        } md:bg-fixed`} 
+        }`} 
         style={{ 
           backgroundImage: heroImage ? `url("${heroImage.url}")` : 'none',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          width: '100%',
+          height: '100%'
         }}
       >
         {/* Mobile-first gradient overlay using Tailwind */}
