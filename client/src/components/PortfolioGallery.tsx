@@ -109,7 +109,7 @@ const PortfolioGallery = ({
               transition={{ duration: 0.3 }}
             >
               {/* Carousel for featured photos only - Hidden for monochrome template */}
-              {featuredPhotos.length > 0 && !window.location.pathname.includes('portfolio') && (
+              {featuredPhotos.length > 0 && !isMonochromeTemplate && (
                 <div className="relative mb-16 rounded-lg overflow-hidden shadow-lg">
                   <div className="w-full aspect-[16/9] relative">
                     <AnimatePresence mode="wait">
