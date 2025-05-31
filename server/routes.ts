@@ -203,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : null;
 
       // Get storage usage with proper aggregation
-      const { getUserStorageUsage } = await import('./storage-tracking');
+      const { getUserStorageUsage } = await import('./storage-tracking.js');
       const storageUsage = await getUserStorageUsage(userId);
 
       res.json({
@@ -226,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/user/storage-usage", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { getUserStorageUsage } = await import('./storage-tracking');
+      const { getUserStorageUsage } = await import('./storage-tracking.js');
       const storageUsage = await getUserStorageUsage(userId);
       
       const quotaBytes = 250 * 1024 * 1024; // 250MB in bytes
