@@ -236,6 +236,11 @@
   --template-border: #333333;
   --template-heading-weight: 100;
   --template-body-weight: 300;
+  
+  /* Monochrome-specific properties */
+  --monochrome-glow: rgba(255, 255, 255, 0.1);
+  --monochrome-shadow: rgba(0, 0, 0, 0.8);
+  --monochrome-gradient: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
 }
 
 /* Portfolio Template Styles - Apply to portfolio pages only */
@@ -296,41 +301,287 @@
 
 /* Monochrome Template Specific Styles */
 .template-monochrome .portfolio-template {
-  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+  background: var(--monochrome-gradient);
+  min-height: 100vh;
+  position: relative;
+}
+
+.template-monochrome .portfolio-template::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .template-monochrome .hero-section {
-  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+  background: var(--monochrome-gradient);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
 }
 
-.template-monochrome .image-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(255, 255, 255, 0.1);
+.template-monochrome .hero-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+}
+
+/* Dramatic hero styling for monochrome */
+.template-monochrome .hero-section .absolute {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(20px);
+}
+
+.template-monochrome .hero-section h1 {
+  font-size: 4rem;
+  font-weight: 100;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  background: linear-gradient(45deg, #ffffff 0%, #cccccc 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+}
+
+.template-monochrome .hero-section p {
+  font-weight: 200;
+  letter-spacing: 0.1em;
+  opacity: 0.9;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Gallery section with dramatic spacing and effects */
+.template-monochrome .gallery-section {
+  background: var(--monochrome-gradient);
+  padding: 4rem 0;
+  position: relative;
+  z-index: 2;
 }
 
 .template-monochrome .gallery-section h2 {
   font-weight: 100;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+  text-align: center;
+  background: linear-gradient(45deg, #ffffff 0%, #cccccc 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
+/* Masonry grid with dramatic spacing */
 .template-monochrome .masonry-grid {
-  gap: 1.5rem;
+  gap: 2rem;
+  padding: 2rem 0;
 }
 
+/* Image cards with cinematic hover effects */
+.template-monochrome .image-card {
+  background: rgba(17, 17, 17, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0;
+  overflow: hidden;
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+}
+
+.template-monochrome .image-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.02) 50%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.template-monochrome .image-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 
+    0 25px 50px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.template-monochrome .image-card:hover::before {
+  opacity: 1;
+}
+
+.template-monochrome .image-card img {
+  filter: grayscale(20%) contrast(1.1) brightness(0.95);
+  transition: filter 0.6s ease;
+}
+
+.template-monochrome .image-card:hover img {
+  filter: grayscale(0%) contrast(1.2) brightness(1.05);
+}
+
+/* Category buttons with glass morphism */
 .template-monochrome .category-button {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 0;
+  padding: 0.75rem 1.5rem;
+  font-weight: 200;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+}
+
+.template-monochrome .category-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+  transition: left 0.6s ease;
 }
 
 .template-monochrome .category-button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.template-monochrome .category-button:hover::before {
+  left: 100%;
 }
 
 .template-monochrome .category-button.active {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.95);
   color: #000000;
   border-color: #ffffff;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  font-weight: 400;
+}
+
+/* About section styling */
+.template-monochrome .portfolio-template section {
+  background: rgba(10, 10, 10, 0.9);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.template-monochrome .portfolio-template section h2 {
+  font-weight: 100;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 2rem;
+  background: linear-gradient(45deg, #ffffff 0%, #cccccc 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.template-monochrome .portfolio-template section p {
+  color: var(--template-text-light);
+  line-height: 1.8;
+  font-weight: 200;
+  font-size: 1.1rem;
+}
+
+/* Enhanced animations */
+@keyframes monochrome-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.template-monochrome .fade-in {
+  animation: monochrome-fade-in 1s ease-out forwards;
+}
+
+/* Monochrome grid layout */
+.template-monochrome .monochrome-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 3rem;
+  padding: 2rem 0;
+}
+
+.template-monochrome .monochrome-featured-section {
+  position: relative;
+  z-index: 3;
+}
+
+.template-monochrome .monochrome-featured-section h3 {
+  background: linear-gradient(45deg, #ffffff 0%, #cccccc 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Featured photo spotlight styling */
+.template-monochrome .monochrome-featured-section .relative {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+
+.template-monochrome .monochrome-featured-section img {
+  filter: contrast(1.1) brightness(0.95);
+  transition: filter 0.8s ease;
+}
+
+.template-monochrome .monochrome-featured-section img:hover {
+  filter: contrast(1.2) brightness(1.05);
+}
+
+/* Enhanced responsive design for monochrome */
+@media (max-width: 768px) {
+  .template-monochrome .hero-section h1 {
+    font-size: 2.5rem;
+    letter-spacing: 0.2em;
+  }
+  
+  .template-monochrome .gallery-section h2 {
+    font-size: 2rem;
+  }
+  
+  .template-monochrome .monochrome-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .template-monochrome .monochrome-featured-section .relative {
+    height: 50vh;
+  }
+}
+
+/* Scrollbar styling for monochrome */
+.template-monochrome .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 0;
+}
+
+.template-monochrome .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
 }

@@ -2,9 +2,10 @@ import { Photo } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useTemplate } from "@/contexts/TemplateContext";
 
 interface PortfolioGalleryProps {
   selectedCategory: string;
@@ -22,6 +23,8 @@ const PortfolioGallery = ({
   isLoading = false 
 }: PortfolioGalleryProps) => {
   const [featuredPhotoIndex, setFeaturedPhotoIndex] = useState(0);
+  const { currentTemplate } = useTemplate();
+  const isMonochromeTemplate = currentTemplate?.id === 'monochrome';
   
   // Filter and organize photos by category and featured status
   const { displayPhotos, featuredPhotos, regularPhotos } = useMemo(() => {
@@ -176,14 +179,123 @@ const PortfolioGallery = ({
                 </div>
               )}
               
-              {/* Gallery grid - show all photos */}
-              <div className="masonry-grid fade-in">
+              {/* Monochrome Template: Featured Spotlight Layout */}
+              {isMonochromeTemplate && featuredPhotos.length > 0 && (
+                <div className="monochrome-featured-section mb-16">
+                  <motion.h3 
+                    className="text-3xl font-thin text-center mb-8 tracking-widest uppercase"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                  >
+                    Featured Works
+                  </motion.h3>
+                  
+                  {/* Main featured photo spotlight */}
+                  <div className="relative w-full h-[70vh] mb-8 overflow-hidden">
+                    <motion.img
+                      key={featuredPhotos[featuredPhotoIndex]?.id}
+                      src={featuredPhotos[featuredPhotoIndex]?.imageUrl}
+                      alt={featuredPhotos[featuredPhotoIndex]?.title || "Featured photo"}
+                      className="w-full h-full object-cover cursor-pointer"
+                      onClick={() => onPhotoClick(featuredPhotos[featuredPhotoIndex], featuredPhotoIndex, featuredPhotos)}
+                      initial={{ opacity: 0, scale: 1.1 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 1.2, ease: "easeOut" }}
+                    />
+                    
+                    {/* Featured photo overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                    
+                    {/* Featured photo title */}
+                    <div className="absolute bottom-8 left-8 text-white">
+                      <motion.h4 
+                        className="text-2xl font-thin tracking-wide mb-2"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.8, delay: 0.3 }}
+                      >
+                        {featuredPhotos[featuredPhotoIndex]?.title}
+                      </motion.h4>
+                      {featuredPhotos[featuredPhotoIndex]?.description && (
+                        <motion.p 
+                          className="text-gray-300 font-light max-w-md"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.8, delay: 0.5 }}
+                        >
+                          {featuredPhotos[featuredPhotoIndex]?.description}
+                        </motion.p>
+                      )}
+                    </div>
+                    
+                    {/* Star indicator */}
+                    <div className="absolute top-8 right-8">
+                      <Star className="w-6 h-6 text-white fill-white" />
+                    </div>
+                    
+                    {/* Navigation arrows for featured photos */}
+                    {featuredPhotos.length > 1 && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white border-none"
+                          onClick={() => setFeaturedPhotoIndex(prev => prev === 0 ? featuredPhotos.length - 1 : prev - 1)}
+                        >
+                          <ChevronLeft className="h-6 w-6" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white border-none"
+                          onClick={() => setFeaturedPhotoIndex(prev => prev === featuredPhotos.length - 1 ? 0 : prev + 1)}
+                        >
+                          <ChevronRight className="h-6 w-6" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                  
+                  {/* Featured photo thumbnails */}
+                  {featuredPhotos.length > 1 && (
+                    <div className="flex justify-center space-x-4 mb-12">
+                      {featuredPhotos.map((photo, index) => (
+                        <motion.div
+                          key={photo.id}
+                          className={`w-20 h-20 cursor-pointer border-2 transition-all duration-300 ${
+                            index === featuredPhotoIndex 
+                              ? 'border-white shadow-lg' 
+                              : 'border-gray-600 hover:border-gray-400'
+                          }`}
+                          onClick={() => setFeaturedPhotoIndex(index)}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <img
+                            src={photo.imageUrl}
+                            alt={photo.title || "Featured thumbnail"}
+                            className="w-full h-full object-cover"
+                          />
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Gallery grid */}
+              <div className={isMonochromeTemplate ? "monochrome-grid" : "masonry-grid fade-in"}>
                 {Array.isArray(displayPhotos) && displayPhotos.length > 0 ? (
                   displayPhotos.map((photo: Photo, index: number) => (
                     <motion.div
                       key={photo.id}
-                      className="image-card relative overflow-hidden cursor-pointer mb-4 sm:mb-6 rounded-md shadow-sm"
-                      whileHover={{ y: -5 }}
+                      className={`image-card relative overflow-hidden cursor-pointer ${
+                        isMonochromeTemplate 
+                          ? 'mb-8' 
+                          : 'mb-4 sm:mb-6 rounded-md shadow-sm'
+                      }`}
+                      whileHover={{ y: isMonochromeTemplate ? -12 : -5 }}
                       onClick={() => onPhotoClick(photo, index, displayPhotos)}
                       layout
                       initial={{ opacity: 0, y: 20 }}
