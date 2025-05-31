@@ -187,7 +187,7 @@ const PortfolioGallery = ({
               
               {/* Monochrome Template: Featured Spotlight Layout */}
               {isMonochromeTemplate && featuredPhotos.length > 0 && (
-                <div className="monochrome-featured-section mb-16 mt-2">
+                <div className="monochrome-featured-section mb-16 mt-6">
                   <motion.h3 
                     className="text-3xl font-thin text-center mb-8 tracking-widest uppercase"
                     initial={{ opacity: 0, y: 20 }}
