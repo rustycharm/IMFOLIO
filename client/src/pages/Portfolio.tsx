@@ -357,16 +357,14 @@ function PortfolioInner() {
         </section>
       )}
 
-      {/* Category Selection - Not for Monochrome White Template */}
-      {currentTemplate?.id !== 'monochrome-white' && (
-        <div className="container mx-auto px-4 pt-8 pb-4">
-          <CategoryCarousel
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-            variant="standard"
-          />
-        </div>
-      )}
+      {/* Category Selection */}
+      <div className="container mx-auto px-4 pt-8 pb-4">
+        <CategoryCarousel
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          variant="standard"
+        />
+      </div>
 
       {/* Photo Gallery */}
       <div className="gallery-section container mx-auto px-4 pb-16 overflow-hidden">

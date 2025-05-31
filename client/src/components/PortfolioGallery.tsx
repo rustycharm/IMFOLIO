@@ -91,14 +91,14 @@ const PortfolioGallery = ({
 
   // Reset carousel index when category changes - only for classic template
   useEffect(() => {
-    if (!isMonochromeTemplate) {
+    if (!isMonochromeTemplate && !isMonochromeWhiteTemplate) {
       setFeaturedPhotoIndex(0);
     }
-  }, [selectedCategory, isMonochromeTemplate]);
+  }, [selectedCategory, isMonochromeTemplate, isMonochromeWhiteTemplate]);
 
   // Carousel navigation function - only for classic template
   const navigateCarousel = (direction: 'prev' | 'next') => {
-    if (isMonochromeTemplate || !featuredPhotos || !featuredPhotos.length) return;
+    if (isMonochromeTemplate || isMonochromeWhiteTemplate || !featuredPhotos || !featuredPhotos.length) return;
     
     if (direction === 'prev') {
       setFeaturedPhotoIndex(prev => 
@@ -115,7 +115,7 @@ const PortfolioGallery = ({
     <section className="pb-24" id="gallery">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Show title at top for classic template */}
-        {!isMonochromeTemplate && (
+        {!isMonochromeTemplate && !isMonochromeWhiteTemplate && (
           <motion.h2 
             className="text-2xl font-light tracking-wide uppercase mb-12 text-center"
             initial={{ opacity: 0 }}
@@ -146,7 +146,7 @@ const PortfolioGallery = ({
               transition={{ duration: 0.3 }}
             >
               {/* Classic Template: Legacy Carousel */}
-              {featuredPhotos.length > 0 && !isMonochromeTemplate && (
+              {featuredPhotos.length > 0 && !isMonochromeTemplate && !isMonochromeWhiteTemplate && (
                 <>
                   <motion.h3 
                     className="text-2xl font-light tracking-wide uppercase mb-8 text-center"
