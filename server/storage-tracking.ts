@@ -62,6 +62,34 @@ export async function getUserStorageUsage(userId: string): Promise<AggregatedSto
 }
 
 /**
+ * Log file upload for storage tracking
+ */
+export async function logFileUpload(
+  userId: string,
+  fileKey: string,
+  originalFilename: string | undefined,
+  fileSizeBytes: number,
+  imageType: 'photo' | 'hero' | 'profile'
+): Promise<void> {
+  try {
+    const formattedSize = formatBytes(fileSizeBytes);
+    
+    await storage.logStorageUsage({
+      userId,
+      fileKey,
+      originalFilename: originalFilename || 'unknown',
+      compressedSize: formattedSize,
+      imageType
+    });
+    
+    console.log(`📊 Storage logged: ${imageType} upload for user ${userId} (${formattedSize})`);
+  } catch (error) {
+    console.error('Error logging storage usage:', error);
+    // Don't throw error to avoid breaking upload flow
+  }
+}
+
+/**
  * Format bytes to human-readable format
  */
 function formatBytes(bytes: number): string {
