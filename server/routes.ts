@@ -835,9 +835,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('🔍 Looking for profile with identifier:', identifier);
 
     try {
-      // Method 1: Try direct database query for username
+      // Method 1: Try direct database query for username (case-insensitive)
       console.log('🔍 Method 1: Checking username match');
-      const [userProfile] = await db.select().from(profiles).where(eq(profiles.username, identifier));
+      const [userProfile] = await db.select().from(profiles).where(sql`LOWER(${profiles.username}) = LOWER(${identifier})`);
 
       if (userProfile) {
         console.log('✅ Found profile by username:', userProfile);

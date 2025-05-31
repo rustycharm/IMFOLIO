@@ -17,20 +17,20 @@ export function generatePortfolioUrl(user: any): string {
   
   switch (urlType) {
     case 'username':
-      return `/${username || userId}`;
+      return `/${username?.toLowerCase() || userId}`;
     case 'fullname_dash':
       if (firstName && lastName) {
         return `/${firstName.toLowerCase()}-${lastName.toLowerCase()}`;
       }
-      return username ? `/${username}` : `/${userId}`;
+      return username ? `/${username.toLowerCase()}` : `/${userId}`;
     case 'fullname_dot':
       if (firstName && lastName) {
         return `/${firstName.toLowerCase()}.${lastName.toLowerCase()}`;
       }
-      return username ? `/${username}` : `/${userId}`;
+      return username ? `/${username.toLowerCase()}` : `/${userId}`;
     case 'replit_id':
       return `/${userId}`;
     default:
-      return username ? `/${username}` : `/${userId}`;
+      return username ? `/${username.toLowerCase()}` : `/${userId}`;
   }
 }
