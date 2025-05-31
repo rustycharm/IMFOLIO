@@ -25,6 +25,7 @@ const PortfolioGallery = ({
   const [featuredPhotoIndex, setFeaturedPhotoIndex] = useState(0);
   const { currentTemplate } = useTemplate();
   const isMonochromeTemplate = currentTemplate?.id === 'monochrome';
+  const isMonochromeWhiteTemplate = currentTemplate?.id === 'monochrome-white';
   
   // Filter and organize photos by category and featured status
   const { displayPhotos, featuredPhotos, regularPhotos } = useMemo(() => {
@@ -42,8 +43,38 @@ const PortfolioGallery = ({
     const featured = filteredPhotos.filter(photo => photo.featured === true);
     const regular = filteredPhotos.filter(photo => photo.featured !== true);
     
-    // For carousel: prioritize featured photos, then regular photos
-    const displayOrder = [...featured, ...regular];
+    // For monochrome-white: create integrated river with featured photos mixed in
+    let displayOrder;
+    if (currentTemplate?.id === 'monochrome-white') {
+      // Create a mixed array where featured photos are strategically placed
+      displayOrder = [];
+      let featuredIndex = 0;
+      let regularIndex = 0;
+      
+      for (let i = 0; i < filteredPhotos.length; i++) {
+        // Place featured photos at positions 0, 4, 8, etc. for visual balance
+        if (i % 4 === 0 && featuredIndex < featured.length) {
+          displayOrder.push({ ...featured[featuredIndex], isRiverFeatured: true });
+          featuredIndex++;
+        } else if (regularIndex < regular.length) {
+          displayOrder.push(regular[regularIndex]);
+          regularIndex++;
+        }
+      }
+      
+      // Add any remaining photos
+      while (featuredIndex < featured.length) {
+        displayOrder.push({ ...featured[featuredIndex], isRiverFeatured: true });
+        featuredIndex++;
+      }
+      while (regularIndex < regular.length) {
+        displayOrder.push(regular[regularIndex]);
+        regularIndex++;
+      }
+    } else {
+      // For carousel: prioritize featured photos, then regular photos
+      displayOrder = [...featured, ...regular];
+    }
     
     return { 
       displayPhotos: displayOrder, 

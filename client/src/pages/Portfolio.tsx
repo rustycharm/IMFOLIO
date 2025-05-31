@@ -161,8 +161,52 @@ function PortfolioInner() {
   return (
     <div className={`min-h-screen portfolio-template ${currentTemplate?.id ? `template-${currentTemplate.id}` : 'template-classic'}`}>
       
-      {/* Monochrome Template: Column-based Hero */}
-      {currentTemplate?.id === 'monochrome' ? (
+      {/* Monochrome White Template: Gradient Split Hero */}
+      {currentTemplate?.id === 'monochrome-white' ? (
+        <div className="monochrome-white-hero min-h-[60vh] bg-gradient-to-b from-gray-100 to-white px-4 py-16">
+          <div className="container mx-auto max-w-6xl h-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 h-full items-center">
+              
+              {/* Left Panel: Profile & Name */}
+              <div className="text-left space-y-6">
+                <div className="flex items-center space-x-6">
+                  <div className="w-24 h-24 rounded-full overflow-hidden border border-gray-200 shadow-sm">
+                    {profile.profileImage ? (
+                      <img 
+                        src={profile.profileImage} 
+                        alt={displayName}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <Camera className="w-8 h-8 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <h1 className="text-4xl font-light text-gray-900 tracking-wide">
+                      {displayName}
+                    </h1>
+                    <p className="text-lg text-gray-600 mt-2">
+                      {profile.tagline}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Right Panel: Bio */}
+              <div className="text-center">
+                <div className="max-w-md mx-auto">
+                  <p className="text-gray-700 leading-relaxed text-lg">
+                    {profile.aboutMe}
+                  </p>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      ) : currentTemplate?.id === 'monochrome' ? (
         <div className="monochrome-hero-section pt-8 pb-4 px-4">
           <div className="container mx-auto max-w-4xl">
             <div className="flex flex-col items-center text-center space-y-4">
