@@ -193,7 +193,7 @@ const Hero = ({ selectedCategory, onCategoryChange }: HeroProps) => {
             {photographerName}
           </h1>
           <p className="text-white/90 text-sm xs:text-base sm:text-lg md:text-xl mb-6 sm:mb-8 md:mb-12 font-light px-2 sm:px-0 leading-relaxed">
-            {isAuthenticated && user?.profile?.tagline ? user.profile.tagline : "YOUR STORY, THROUGH THE LENS"}
+            {isAuthenticated && (user as any)?.tagline ? (user as any).tagline : "YOUR STORY, THROUGH THE LENS"}
           </p>
           {/* Responsive category carousel */}
           <div className="max-w-4xl mx-auto px-2 sm:px-0">
