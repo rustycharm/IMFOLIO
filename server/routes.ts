@@ -10,6 +10,8 @@ import multer from "multer";
 import path from "path";
 import { uploadImage, getStorageAnalyticsAdmin } from "./objectStorage";
 import sharp from "sharp";
+import { sendContactNotification } from "./emailService";
+import { z } from "zod";
 
 // Configure multer for AI analysis uploads (memory storage for temporary processing)
 const upload = multer({ 
@@ -787,13 +789,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Messages endpoint
-  app.get("/api/messages", async (req, res) => {
+  // Get all messages (admin only)
+  app.get("/api/messages", isAuthenticated, isAdmin, async (req, res) => {
     try {
       const messages = await storage.getAllMessages();
       res.json(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
       res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  // Contact form submission
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const contactSchema = z.object({
+        name: z.string().min(2, "Name must be at least 2 characters"),
+        email: z.string().email("Please enter a valid email address"),
+        subject: z.string().min(2, "Subject must be at least 2 characters"),
+        message: z.string().min(10, "Message must be at least 10 characters"),
+      });
+
+      const validatedData = contactSchema.parse(req.body);
+      
+      // Create a message entry in the database
+      // For contact form, we'll use a special system user ID or create anonymous entry
+      const anonymousUserId = "anonymous"; // We'll need to handle this in the schema
+      const messageContent = JSON.stringify({
+        name: validatedData.name,
+        email: validatedData.email,
+        subject: validatedData.subject,
+        message: validatedData.message,
+        timestamp: new Date().toISOString(),
+        source: "contact_form"
+      });
+
+      // Save to database
+      await storage.createMessage(anonymousUserId, messageContent);
+
+      // Send email notification to admin
+      try {
+        const adminUsers = await storage.getAllUsers();
+        const admin = adminUsers.find(user => user.role === 'admin');
+        
+        if (admin && admin.email) {
+          await sendContactNotification({
+            name: validatedData.name,
+            email: validatedData.email,
+            subject: validatedData.subject,
+            message: validatedData.message,
+            adminEmail: admin.email
+          });
+        }
+      } catch (emailError) {
+        console.warn("Failed to send email notification:", emailError);
+        // Don't fail the request if email fails
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Message sent successfully" 
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Validation error", 
+          errors: error.errors 
+        });
+      }
+      console.error("Contact form error:", error);
+      res.status(500).json({ message: "Failed to send message" });
     }
   });
 

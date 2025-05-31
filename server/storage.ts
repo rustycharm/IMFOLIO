@@ -71,6 +71,7 @@ export interface IStorage {
 
   // Message operations
   getAllMessages(): Promise<Message[]>;
+  createMessage(userId: string, content: string): Promise<Message>;
 
   // Profile operations
   getProfile(userId: string): Promise<Profile | undefined>;
@@ -337,7 +338,18 @@ export class DatabaseStorage implements IStorage {
 
   // Message operations
   async getAllMessages(): Promise<Message[]> {
-    return await db.select().from(messages);
+    return await db.select().from(messages).orderBy(desc(messages.createdAt));
+  }
+
+  async createMessage(userId: string, content: string): Promise<Message> {
+    const [message] = await db
+      .insert(messages)
+      .values({
+        userId,
+        content,
+      })
+      .returning();
+    return message;
   }
 
   // Profile operations
