@@ -92,7 +92,7 @@ const CategoryCarousel = ({
       {/* Category buttons */}
       <div 
         ref={carouselRef}
-        className="flex overflow-x-auto gap-2 sm:gap-3 px-1 py-2 custom-scrollbar"
+        className="flex overflow-x-auto gap-2 sm:gap-3 px-1 py-2 custom-scrollbar justify-center"
         onScroll={checkForArrows}
       >
         {photoCategories.map(category => (
