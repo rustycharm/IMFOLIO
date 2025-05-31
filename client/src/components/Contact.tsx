@@ -24,6 +24,7 @@ const formSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
   subject: z.string().min(2, "Subject must be at least 2 characters."),
   message: z.string().min(10, "Message must be at least 10 characters."),
+  honeypot: z.string().max(0, "Bot detection failed"), // Honeypot field
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -38,6 +39,7 @@ const Contact = () => {
       email: "",
       subject: "",
       message: "",
+      honeypot: "", // Hidden field for bot detection
     },
   });
 
@@ -152,6 +154,24 @@ const Contact = () => {
                         />
                       </FormControl>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Honeypot field - hidden from users, but bots will fill it */}
+                <FormField
+                  control={form.control}
+                  name="honeypot"
+                  render={({ field }) => (
+                    <FormItem className="hidden">
+                      <FormLabel>Leave this field empty</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          tabIndex={-1}
+                          autoComplete="off"
+                        />
+                      </FormControl>
                     </FormItem>
                   )}
                 />

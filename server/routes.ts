@@ -13,6 +13,36 @@ import sharp from "sharp";
 import { sendContactNotification } from "./emailService";
 import { z } from "zod";
 
+// Rate limiting for contact form
+const contactAttempts = new Map<string, { count: number; lastAttempt: number }>();
+const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
+const MAX_ATTEMPTS = 3; // Max 3 submissions per 15 minutes per IP
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const userAttempts = contactAttempts.get(ip);
+
+  if (!userAttempts) {
+    contactAttempts.set(ip, { count: 1, lastAttempt: now });
+    return true;
+  }
+
+  // Reset if window has passed
+  if (now - userAttempts.lastAttempt > RATE_LIMIT_WINDOW) {
+    contactAttempts.set(ip, { count: 1, lastAttempt: now });
+    return true;
+  }
+
+  // Check if under limit
+  if (userAttempts.count < MAX_ATTEMPTS) {
+    userAttempts.count++;
+    userAttempts.lastAttempt = now;
+    return true;
+  }
+
+  return false;
+}
+
 // Configure multer for AI analysis uploads (memory storage for temporary processing)
 const upload = multer({ 
   storage: multer.memoryStorage(),
@@ -803,14 +833,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contact form submission
   app.post("/api/contact", async (req, res) => {
     try {
+      // Get client IP for rate limiting
+      const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
+      
+      // Check rate limit first
+      if (!checkRateLimit(clientIP)) {
+        return res.status(429).json({ 
+          message: "Too many submissions. Please wait before trying again." 
+        });
+      }
+
       const contactSchema = z.object({
         name: z.string().min(2, "Name must be at least 2 characters"),
         email: z.string().email("Please enter a valid email address"),
         subject: z.string().min(2, "Subject must be at least 2 characters"),
         message: z.string().min(10, "Message must be at least 10 characters"),
+        honeypot: z.string().max(0, "Bot detection failed"), // Honeypot validation
       });
 
       const validatedData = contactSchema.parse(req.body);
+
+      // Additional bot protection: Check if honeypot field was filled
+      if (validatedData.honeypot && validatedData.honeypot.length > 0) {
+        console.log(`Bot detected from IP ${clientIP}: honeypot field filled`);
+        return res.status(400).json({ 
+          message: "Invalid submission detected" 
+        });
+      }
       
       // Save contact form data to database
       await storage.createMessage({
