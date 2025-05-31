@@ -181,7 +181,7 @@ function PortfolioInner() {
           {/* Glass morphism backdrop */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-gray-50/30 to-gray-100/40 backdrop-blur-sm"></div>
           <div className="container mx-auto h-full px-16 py-16 relative z-10">
-            <div className="flex items-center space-x-12 max-w-5xl ml-8">
+            <div className="flex items-center justify-start space-x-12 max-w-5xl ml-8 min-h-[50vh]">
               
               {/* Portrait Profile Picture with Enhanced Effects */}
               <div className="relative">
