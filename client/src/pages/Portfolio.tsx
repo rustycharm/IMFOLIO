@@ -333,31 +333,35 @@ function PortfolioInner() {
 
           {/* Container with mobile-first spacing */}
           <div className="container relative z-10 mb-12 sm:mb-16 px-4 sm:px-6 lg:px-8 w-full">
-            <div 
-              className="max-w-5xl mx-auto text-center"
-            >
-              {/* Profile picture positioned above the text */}
-              <div className="flex justify-center mb-6 sm:mb-8">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 border-2 border-white rounded-full overflow-hidden bg-primary/20 flex items-center justify-center">
-                  {profile.profileImage ? (
-                    <img 
-                      src={profile.profileImage} 
-                      alt={displayName}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Camera className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-                  )}
+            <div className="max-w-5xl mx-auto">
+              {/* Profile picture and text side by side */}
+              <div className="flex flex-col sm:flex-row items-center sm:items-end justify-center sm:justify-start space-y-6 sm:space-y-0 sm:space-x-8">
+                {/* Profile picture positioned to the left */}
+                <div className="flex-shrink-0">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 border-2 border-white rounded-full overflow-hidden bg-primary/20 flex items-center justify-center">
+                    {profile.profileImage ? (
+                      <img 
+                        src={profile.profileImage} 
+                        alt={displayName}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Camera className="w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 text-white" />
+                    )}
+                  </div>
+                </div>
+                
+                {/* Text content aligned to the left on larger screens */}
+                <div className="text-center sm:text-left flex-1">
+                  {/* Mobile-first typography with proper Tailwind breakpoints */}
+                  <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-white mb-3 sm:mb-4 tracking-tight leading-tight">
+                    {displayName}
+                  </h1>
+                  <p className="text-white/90 text-sm xs:text-base sm:text-lg md:text-xl mb-6 sm:mb-8 font-light leading-relaxed">
+                    {profile.tagline || "PHOTOGRAPHY PORTFOLIO"}
+                  </p>
                 </div>
               </div>
-              
-              {/* Mobile-first typography with proper Tailwind breakpoints */}
-              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-white mb-3 sm:mb-4 tracking-tight leading-tight">
-                {displayName}
-              </h1>
-              <p className="text-white/90 text-sm xs:text-base sm:text-lg md:text-xl mb-6 sm:mb-8 md:mb-12 font-light px-2 sm:px-0 leading-relaxed">
-                {profile.tagline || "PHOTOGRAPHY PORTFOLIO"}
-              </p>
               
               {/* Social links */}
               <div className="flex justify-center space-x-6 mt-8">
