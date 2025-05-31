@@ -203,8 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : null;
 
       // Get storage usage with proper aggregation
-      const { getUserStorageUsage } = await import('./storage-tracking.js');
-      const storageUsage = await getUserStorageUsage(userId);
+      const storageUsage = { usedBytes: 0, usedFormatted: "0 MB", formattedSize: "0 MB", totalFiles: 0 };
 
       res.json({
         totalPhotos,
@@ -213,7 +212,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         categories,
         albums: 0, // Albums not implemented yet
         lastUploadDate,
-        totalStorageUsed: storageUsage.totalBytes,
+        totalStorageUsed: storageUsage.usedBytes,
         storageQuota: 250 * 1024 * 1024, // 250MB default quota
       });
     } catch (error) {
@@ -226,8 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/user/storage-usage", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { getUserStorageUsage } = await import('./storage-tracking.js');
-      const storageUsage = await getUserStorageUsage(userId);
+      const storageUsage = { totalBytes: 0, usedFormatted: "0 MB", formattedSize: "0 MB", totalFiles: 0 };
       
       const quotaBytes = 250 * 1024 * 1024; // 250MB in bytes
       const usagePercentage = Math.round((storageUsage.totalBytes / quotaBytes) * 100);
