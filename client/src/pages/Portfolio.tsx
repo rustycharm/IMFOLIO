@@ -110,7 +110,7 @@ function PortfolioInner() {
       const defaultResponse = await fetch('/api/hero-images/default');
       return defaultResponse.ok ? defaultResponse.json() : null;
     },
-    enabled: !!profile && !!profile.id,
+    enabled: !!profile && !!profile.id && currentTemplate?.id !== 'monochrome',
   });
 
   // Handle photo click for lightbox
