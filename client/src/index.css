@@ -760,7 +760,8 @@
   pointer-events: none;
 }
 
-.template-epic .epic-photo-panel:hover .epic-photo-content::before {
+.template-epic .epic-photo-title:hover ~ .epic-photo-content::before,
+.template-epic .epic-photo-content:hover::before {
   background: linear-gradient(to bottom, 
     transparent 0%, 
     rgba(0, 0, 0, 0.3) 60%,
