@@ -702,7 +702,7 @@
 }
 
 .template-epic .epic-about-content h2 {
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
   font-weight: var(--template-heading-weight);
   color: var(--template-text);
   margin-bottom: 2rem;
@@ -710,7 +710,7 @@
 }
 
 .template-epic .epic-about-content p {
-  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-size: clamp(1rem, 2vw, 1.2rem);
   color: var(--template-text-light);
   line-height: 1.6;
   font-family: 'Montserrat', sans-serif;
