@@ -251,6 +251,17 @@
   font-weight: var(--template-body-weight);
 }
 
+/* Default template hero text styling for better visibility */
+.template-classic .hero-section h1,
+.template-classic .hero-section h2 {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  color: white;
+}
+
+.template-classic .hero-section .text-white {
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+
 .portfolio-template h1,
 .portfolio-template h2,
 .portfolio-template h3,

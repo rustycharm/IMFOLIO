@@ -167,7 +167,7 @@ function PortfolioInner() {
           backgroundImage: `url(${heroImageData?.url || (profile?.heroImage ? `/api/hero-images/user/${profile.id}` : '')})`,
         }}
       >
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-center items-center text-white px-4">
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-white px-4">
           <div className="flex flex-col items-center max-w-3xl text-center">
             <div className="w-24 h-24 border-2 border-white mb-6 rounded-full overflow-hidden bg-primary/20 flex items-center justify-center">
               {profile.profileImage ? (
@@ -246,7 +246,7 @@ function PortfolioInner() {
           <div className="container mx-auto px-4">
             <h2 className="text-2xl font-light mb-4 text-center">About</h2>
             <div className="max-w-2xl mx-auto">
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line text-center">
                 {profile.aboutMe}
               </p>
             </div>
