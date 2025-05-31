@@ -175,8 +175,73 @@ function PortfolioInner() {
         </div>
       </header>
       
-      {/* Monochrome White Template: Portrait Hero */}
-      {currentTemplate?.id === 'monochrome-white' ? (
+      {/* Epic Template: Apple-inspired Hero */}
+      {currentTemplate?.id === 'epic' ? (
+        <div 
+          className="epic-hero"
+          style={{
+            backgroundImage: heroImageData?.url ? `url("${heroImageData.url}")` : 'none',
+          }}
+        >
+          <div className="epic-hero-content container mx-auto px-8">
+            {/* Profile picture */}
+            <div className="flex justify-center mb-8">
+              <div className="epic-profile overflow-hidden bg-primary/20 flex items-center justify-center">
+                {profile.profileImage ? (
+                  <img 
+                    src={profile.profileImage} 
+                    alt={displayName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Camera className="w-12 h-12 text-white" />
+                )}
+              </div>
+            </div>
+            
+            {/* Large typography */}
+            <h1>{displayName}</h1>
+            <p>{profile.tagline || "PHOTOGRAPHY PORTFOLIO"}</p>
+            
+            {/* Social links */}
+            <div className="flex justify-center space-x-8">
+              {profile.instagram && (
+                <a 
+                  href={profile.instagram.startsWith('http') ? profile.instagram : `https://instagram.com/${profile.instagram}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="text-white/80 hover:text-white transition-colors duration-500"
+                >
+                  <Instagram className="w-8 h-8" />
+                </a>
+              )}
+              {profile.twitter && (
+                <a 
+                  href={profile.twitter.startsWith('http') ? profile.twitter : `https://twitter.com/${profile.twitter}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  aria-label="Twitter"
+                  className="text-white/80 hover:text-white transition-colors duration-500"
+                >
+                  <Twitter className="w-8 h-8" />
+                </a>
+              )}
+              {profile.website && (
+                <a 
+                  href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  aria-label="Website"
+                  className="text-white/80 hover:text-white transition-colors duration-500"
+                >
+                  <Globe className="w-8 h-8" />
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : currentTemplate?.id === 'monochrome-white' ? (
         <div className="monochrome-white-hero relative bg-gradient-to-br from-gray-50 via-white to-gray-100 overflow-hidden pt-20 pb-8">
           {/* Glass morphism backdrop */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-gray-50/30 to-gray-100/40 backdrop-blur-sm"></div>
@@ -418,7 +483,7 @@ function PortfolioInner() {
       )}
 
       {/* About Section - Only for Classic Template */}
-      {currentTemplate?.id !== 'monochrome' && currentTemplate?.id !== 'monochrome-white' && profile.aboutMe && (
+      {currentTemplate?.id !== 'monochrome' && currentTemplate?.id !== 'monochrome-white' && currentTemplate?.id !== 'epic' && profile.aboutMe && (
         <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl font-light mb-4 text-center">About</h2>
@@ -431,17 +496,87 @@ function PortfolioInner() {
         </section>
       )}
 
-      {/* Category Selection */}
-      <div className={`container mx-auto px-4 pt-8 ${currentTemplate?.id === 'monochrome-white' ? 'pb-12' : 'pb-4'}`}>
-        <CategoryCarousel
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-          variant="standard"
-        />
-      </div>
+      {/* Epic Template: Apple-inspired Gallery Section */}
+      {currentTemplate?.id === 'epic' ? (
+        <div className="epic-gallery epic-section">
+          <div className="container mx-auto px-8">
+            {/* About section for Epic template */}
+            {profile.bio && (
+              <div className="text-center mb-20">
+                <h2 className="text-5xl font-semibold text-gray-900 mb-8 leading-tight">
+                  About the Artist
+                </h2>
+                <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                  {profile.bio}
+                </p>
+              </div>
+            )}
+            
+            {/* Category selection for Epic */}
+            <div className="mb-16">
+              <CategoryCarousel
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+                variant="standard"
+              />
+            </div>
+            
+            {/* Epic grid layout */}
+            <div className="epic-grid">
+              {isPhotosLoading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="epic-card">
+                    <Skeleton className="w-full h-80" />
+                  </div>
+                ))
+              ) : photosError || !photos ? (
+                <div className="col-span-full text-center py-20">
+                  <p className="text-xl text-gray-500">Unable to load photos. Please try again later.</p>
+                </div>
+              ) : filteredPhotos.length === 0 ? (
+                <div className="col-span-full text-center py-20">
+                  <p className="text-xl text-gray-500">No photos found for this category.</p>
+                </div>
+              ) : (
+                filteredPhotos.map((photo: any, index: number) => (
+                  <div
+                    key={photo.id}
+                    className="epic-card cursor-pointer group"
+                    onClick={() => openLightbox(photo, index, filteredPhotos)}
+                  >
+                    <div className="aspect-[4/3] overflow-hidden">
+                      <img
+                        src={photo.imageUrl}
+                        alt={photo.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="font-semibold text-lg text-gray-900 mb-2">{photo.title}</h3>
+                      {photo.description && (
+                        <p className="text-gray-600 text-sm leading-relaxed">{photo.description}</p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Category Selection - For non-Epic templates */}
+          <div className={`container mx-auto px-4 pt-8 ${currentTemplate?.id === 'monochrome-white' ? 'pb-12' : 'pb-4'}`}>
+            <CategoryCarousel
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+              variant="standard"
+            />
+          </div>
 
-      {/* Photo Gallery */}
-      <div className="gallery-section container mx-auto px-4 pb-16 overflow-hidden">
+          {/* Photo Gallery - For non-Epic templates */}
+          <div className="gallery-section container mx-auto px-4 pb-16 overflow-hidden">
         {isPhotosLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[...Array(8)].map((_, i) => (
