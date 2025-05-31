@@ -47,7 +47,7 @@ export default function PhotoStats() {
     });
   };
 
-  if (isLoading || storageLoading) {
+  if (statsLoading || storageLoading) {
     return (
       <div className="mt-6 p-6 border rounded-md bg-gray-50 animate-pulse">
         <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
