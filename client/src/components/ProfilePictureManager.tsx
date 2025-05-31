@@ -105,10 +105,6 @@ export default function ProfilePictureManager() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-xl font-semibold mb-2">Profile Picture</h3>
-        <p className="text-gray-500">Upload a dedicated profile picture separate from your portfolio</p>
-      </div>
 
       {/* Current Profile Picture */}
       <Card>
