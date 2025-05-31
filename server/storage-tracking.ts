@@ -90,6 +90,19 @@ export async function logFileUpload(
 }
 
 /**
+ * Log file deletion for storage tracking
+ */
+export async function logFileDeletion(fileKey: string): Promise<void> {
+  try {
+    console.log(`📊 Storage deletion logged: ${fileKey}`);
+    // Note: We could add deletion tracking to database if needed
+  } catch (error) {
+    console.error('Error logging file deletion:', error);
+    // Don't throw error to avoid breaking deletion flow
+  }
+}
+
+/**
  * Format bytes to human-readable format
  */
 function formatBytes(bytes: number): string {

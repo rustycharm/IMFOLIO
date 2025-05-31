@@ -217,14 +217,19 @@ export async function uploadImage(
     const url = getPublicUrl(key);
 
     // Log actual file size for storage tracking
-    const { logFileUpload } = await import('./storage-tracking');
-    await logFileUpload(
-      options.userId,
-      key,
-      options.originalFilename,
-      imageBuffer.length,
-      imageType as 'photo' | 'hero' | 'profile'
-    );
+    try {
+      const { logFileUpload } = await import('./storage-tracking');
+      await logFileUpload(
+        String(options.userId),
+        key,
+        options.originalFilename,
+        imageBuffer.length,
+        imageType as 'photo' | 'hero' | 'profile'
+      );
+    } catch (trackingError) {
+      console.warn('Failed to log storage usage:', trackingError);
+      // Don't fail upload if tracking fails
+    }
 
     console.log(`✅ Successfully uploaded: ${key}`);
 

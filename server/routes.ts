@@ -2135,6 +2135,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`📸 Profile image upload initiated for user ${userId}`);
 
+      // Get current profile image URL for cleanup
+      const currentUser = await storage.getUser(userId);
+      const currentProfileImageUrl = currentUser?.profileImageUrl;
+
       // Compress the profile image
       const compressedBuffer = await sharp(file.buffer)
         .resize(400, 400, { 
@@ -2154,6 +2158,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update user's profile image URL
       await storage.updateUserProfileImage(userId, uploadResult.url);
+
+      // Clean up previous profile image from object storage
+      if (currentProfileImageUrl && currentProfileImageUrl !== uploadResult.url) {
+        try {
+          const { deleteImage } = await import('./objectStorage');
+          // Convert URL to storage key by removing '/images/' prefix
+          const imageKey = currentProfileImageUrl.replace('/images/', '');
+          await deleteImage(imageKey);
+          console.log(`🗑️ Cleaned up previous profile image: ${currentProfileImageUrl}`);
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup previous profile image:', cleanupError);
+          // Don't fail the upload if cleanup fails
+        }
+      }
 
       console.log(`✅ Profile image uploaded successfully for user ${userId}: ${uploadResult.key}`);
 
