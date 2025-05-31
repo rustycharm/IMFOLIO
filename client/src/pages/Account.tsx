@@ -11,6 +11,7 @@ import ProfileEditForm from "@/components/ProfileEditForm";
 import PhotoStats from "@/components/PhotoStats";
 import HeroImageManager from "@/components/HeroImageManager";
 import ProfilePictureManager from "@/components/ProfilePictureManager";
+import PortfolioCustomization from "@/components/PortfolioCustomization";
 import { useAuth } from "@/hooks/useAuth";
 import { generatePortfolioUrl } from "@/lib/utils";
 
@@ -503,11 +504,10 @@ export default function Account() {
         )}
 
         <Tabs defaultValue="photos" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full overflow-x-auto flex md:grid md:grid-cols-5 gap-2 md:gap-0 p-1">
+          <TabsList className="w-full overflow-x-auto flex md:grid md:grid-cols-4 gap-2 md:gap-0 p-1">
             <TabsTrigger value="photos" className="whitespace-nowrap flex-shrink-0">My Photos</TabsTrigger>
             <TabsTrigger value="profile" className="whitespace-nowrap flex-shrink-0">Edit Profile</TabsTrigger>
-            <TabsTrigger value="hero" className="whitespace-nowrap flex-shrink-0">Hero Image</TabsTrigger>
-            <TabsTrigger value="avatar" className="whitespace-nowrap flex-shrink-0">Profile Picture</TabsTrigger>
+            <TabsTrigger value="portfolio" className="whitespace-nowrap flex-shrink-0">Portfolio</TabsTrigger>
             <TabsTrigger value="settings" className="whitespace-nowrap flex-shrink-0">Settings</TabsTrigger>
           </TabsList>
 

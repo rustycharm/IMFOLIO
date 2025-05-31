@@ -1124,6 +1124,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Template routes
+  app.get("/api/templates", async (req, res) => {
+    try {
+      const templates = await storage.getAllPortfolioTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching templates:", error);
+      res.status(500).json({ message: "Failed to fetch templates" });
+    }
+  });
+
+  app.get("/api/user/template", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const selection = await storage.getUserTemplateSelection(userId);
+      
+      if (!selection) {
+        // Return default template if no selection exists
+        const templates = await storage.getAllPortfolioTemplates();
+        const defaultTemplate = templates.find(t => t.isDefault) || templates[0];
+        return res.json({ templateId: defaultTemplate?.id || 'classic' });
+      }
+      
+      res.json({ templateId: selection.templateId });
+    } catch (error) {
+      console.error("Error fetching user template:", error);
+      res.status(500).json({ message: "Failed to fetch user template" });
+    }
+  });
+
+  app.post("/api/user/template", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { templateId } = req.body;
+
+      if (!templateId) {
+        return res.status(400).json({ message: "Template ID is required" });
+      }
+
+      // Verify template exists
+      const template = await storage.getPortfolioTemplate(templateId);
+      if (!template) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+
+      const selection = await storage.setUserTemplateSelection({
+        userId,
+        templateId,
+        customizations: null
+      });
+
+      res.json(selection);
+    } catch (error) {
+      console.error("Error setting user template:", error);
+      res.status(500).json({ message: "Failed to set user template" });
+    }
+  });
+
   // Admin routes
   app.get("/api/admin/users", isAuthenticated, isAdmin, async (req, res) => {
     try {

@@ -78,6 +78,12 @@ export interface IStorage {
   getProfileByUsername(username: string): Promise<Profile | undefined>;
   createProfile(data: any): Promise<Profile>;
   updateProfile(userId: string, data: any): Promise<Profile>;
+
+  // Template operations
+  getAllPortfolioTemplates(): Promise<PortfolioTemplate[]>;
+  getPortfolioTemplate(templateId: string): Promise<PortfolioTemplate | undefined>;
+  getUserTemplateSelection(userId: string): Promise<UserTemplateSelection | undefined>;
+  setUserTemplateSelection(data: InsertUserTemplateSelection): Promise<UserTemplateSelection>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -579,6 +585,61 @@ export class DatabaseStorage implements IStorage {
     return profile || null;
   }
 
+  // Template operations
+  async getAllPortfolioTemplates(): Promise<PortfolioTemplate[]> {
+    return await db.select().from(portfolioTemplates).where(eq(portfolioTemplates.isActive, true));
+  }
+
+  async getPortfolioTemplate(templateId: string): Promise<PortfolioTemplate | undefined> {
+    const [template] = await db
+      .select()
+      .from(portfolioTemplates)
+      .where(and(eq(portfolioTemplates.id, templateId), eq(portfolioTemplates.isActive, true)));
+    return template;
+  }
+
+  async getUserTemplateSelection(userId: string): Promise<UserTemplateSelection | undefined> {
+    const [selection] = await db
+      .select()
+      .from(userTemplateSelections)
+      .where(and(
+        eq(userTemplateSelections.userId, userId),
+        eq(userTemplateSelections.isActive, true)
+      ))
+      .orderBy(desc(userTemplateSelections.createdAt))
+      .limit(1);
+    return selection;
+  }
+
+  async setUserTemplateSelection(data: InsertUserTemplateSelection): Promise<UserTemplateSelection> {
+    // Try to update first (most common case for established users)
+    const updated = await db.update(userTemplateSelections)
+      .set({
+        templateId: data.templateId,
+        customizations: data.customizations,
+        isActive: true,
+        updatedAt: new Date()
+      })
+      .where(eq(userTemplateSelections.userId, data.userId))
+      .returning();
+
+    if (updated.length > 0) {
+      return updated[0];
+    }
+
+    // Only create new record if update didn't affect any rows (truly new user)
+    const [inserted] = await db
+      .insert(userTemplateSelections)
+      .values({
+        ...data,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+
+    return inserted;
+  }
 
 }
 
