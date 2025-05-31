@@ -1,4 +1,4 @@
-import { PhotoResponse } from "@shared/schema";
+import { Photo } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -8,9 +8,9 @@ import { useState } from "react";
 
 interface PortfolioGalleryProps {
   selectedCategory: string;
-  onPhotoClick: (photo: PhotoResponse, index: number, photos: PhotoResponse[]) => void;
-  setVisiblePhotos: (photos: PhotoResponse[]) => void;
-  photos: PhotoResponse[];
+  onPhotoClick: (photo: Photo, index: number, photos: Photo[]) => void;
+  setVisiblePhotos: (photos: Photo[]) => void;
+  photos: Photo[];
   isLoading?: boolean;
 }
 
@@ -179,7 +179,7 @@ const PortfolioGallery = ({
               {/* Gallery grid - show all photos */}
               <div className="masonry-grid fade-in">
                 {Array.isArray(displayPhotos) && displayPhotos.length > 0 ? (
-                  displayPhotos.map((photo: PhotoResponse, index: number) => (
+                  displayPhotos.map((photo: Photo, index: number) => (
                     <motion.div
                       key={photo.id}
                       className="image-card relative overflow-hidden cursor-pointer mb-4 sm:mb-6 rounded-md shadow-sm"

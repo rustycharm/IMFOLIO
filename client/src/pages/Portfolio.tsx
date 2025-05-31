@@ -13,7 +13,7 @@ import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import NotFound from "@/pages/not-found";
 import { PhotoLightbox } from "@/components/PhotoLightbox";
-import { TemplateProvider } from "@/contexts/TemplateContext";
+import { TemplateProvider, useTemplate } from "@/contexts/TemplateContext";
 
 type PhotographerProfile = {
   id: number;
@@ -30,9 +30,10 @@ type PhotographerProfile = {
   website: string | null;
 };
 
-export default function Portfolio() {
+function PortfolioInner() {
   const { username } = useParams();
   const { user: currentUser, isAuthenticated } = useAuth();
+  const { currentTemplate } = useTemplate();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [visiblePhotos, setVisiblePhotos] = useState<Photo[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
@@ -114,9 +115,9 @@ export default function Portfolio() {
 
   // Handle photo click for lightbox
   const handlePhotoClick = (
-    photo: PhotoResponse,
+    photo: Photo,
     index: number,
-    photos: PhotoResponse[]
+    photos: Photo[]
   ) => {
     setSelectedPhoto(photo);
     setSelectedIndex(index);
