@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import { EventEmitter } from 'events';
 import { localSMTPService } from './localSMTP';
+import sgMail from '@sendgrid/mail';
 
 interface ContactEmailParams {
   name: string;
