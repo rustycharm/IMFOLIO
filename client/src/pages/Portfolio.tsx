@@ -161,9 +161,23 @@ function PortfolioInner() {
   return (
     <div className={`min-h-screen portfolio-template ${currentTemplate?.id ? `template-${currentTemplate.id}` : 'template-classic'}`}>
       
+      {/* IMFOLIO Branding Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/50">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex justify-between items-center">
+            <div className="text-xl font-light tracking-wider text-gray-800">
+              IMFOLIO
+            </div>
+            <div className="text-xs text-gray-500 uppercase tracking-wide">
+              Portfolio
+            </div>
+          </div>
+        </div>
+      </header>
+      
       {/* Monochrome White Template: Portrait Hero */}
       {currentTemplate?.id === 'monochrome-white' ? (
-        <div className="monochrome-white-hero relative min-h-[50vh] bg-gradient-to-br from-gray-50 via-white to-gray-100 overflow-hidden">
+        <div className="monochrome-white-hero relative min-h-[50vh] bg-gradient-to-br from-gray-50 via-white to-gray-100 overflow-hidden pt-20">
           {/* Glass morphism backdrop */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-gray-50/30 to-gray-100/40 backdrop-blur-sm"></div>
           <div className="container mx-auto h-full px-16 py-16 relative z-10">
@@ -224,7 +238,7 @@ function PortfolioInner() {
           </div>
         </div>
       ) : currentTemplate?.id === 'monochrome' ? (
-        <div className="monochrome-hero-section pt-8 pb-4 px-4">
+        <div className="monochrome-hero-section pt-28 pb-4 px-4">
           <div className="container mx-auto max-w-4xl">
             <div className="flex flex-col items-center text-center space-y-4">
               

@@ -778,3 +778,24 @@ body:has(.template-monochrome) {
   position: relative;
   z-index: 10;
 }
+
+/* Header styling for different templates */
+.template-monochrome header {
+  background: rgba(0, 0, 0, 0.8) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(12px);
+}
+
+.template-monochrome header .text-xl,
+.template-monochrome header .text-xs {
+  color: white !important;
+}
+
+.template-monochrome header .text-gray-500 {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.template-monochrome-white header {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
