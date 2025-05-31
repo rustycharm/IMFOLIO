@@ -10,7 +10,7 @@ import multer from "multer";
 import path from "path";
 import { uploadImage, getStorageAnalyticsAdmin } from "./objectStorage";
 import sharp from "sharp";
-import { sendContactNotification } from "./emailService";
+import { sendContactNotification, getLocalEmails, getLocalEmailById, getLocalEmailsForRecipient } from "./emailService";
 import { z } from "zod";
 
 // Configure multer for AI analysis uploads (memory storage for temporary processing)
@@ -859,6 +859,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Contact form error:", error);
       res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  // Local email service endpoints (admin only)
+  app.get("/api/admin/emails", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const emails = getLocalEmails();
+      res.json(emails);
+    } catch (error) {
+      console.error("Error fetching local emails:", error);
+      res.status(500).json({ message: "Failed to fetch emails" });
+    }
+  });
+
+  app.get("/api/admin/emails/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const email = getLocalEmailById(req.params.id);
+      if (!email) {
+        return res.status(404).json({ message: "Email not found" });
+      }
+      res.json(email);
+    } catch (error) {
+      console.error("Error fetching email:", error);
+      res.status(500).json({ message: "Failed to fetch email" });
     }
   });
 

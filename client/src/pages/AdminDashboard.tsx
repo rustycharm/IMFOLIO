@@ -19,6 +19,7 @@ import { StorageAnalytics } from "@/components/StorageAnalytics";
 import { UserStorageAudit } from "@/components/UserStorageAudit";
 import { ObjectStorageBrowser } from "@/components/ObjectStorageBrowser";
 import AdminMessages from "@/components/AdminMessages";
+import LocalEmailViewer from "@/components/LocalEmailViewer";
 
 
 export default function AdminDashboard() {
@@ -626,6 +627,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="messages" className="space-y-6">
+          <LocalEmailViewer />
           <AdminMessages />
         </TabsContent>
 
