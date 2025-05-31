@@ -13,6 +13,7 @@ import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import NotFound from "@/pages/not-found";
 import { PhotoLightbox } from "@/components/PhotoLightbox";
+import { TemplateProvider } from "@/contexts/TemplateContext";
 
 type PhotographerProfile = {
   id: number;
@@ -157,14 +158,15 @@ export default function Portfolio() {
     : profile.username;
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Banner - Inherited from photographer's account settings */}
-      <div
-        className="relative w-full h-[60vh] bg-cover bg-center"
-        style={{
-          backgroundImage: `url(${heroImageData?.url || (profile?.heroImage ? `/api/hero-images/user/${profile.id}` : '')})`,
-        }}
-      >
+    <TemplateProvider userId={profile.userId}>
+      <div className="min-h-screen template-portfolio">
+        {/* Hero Banner - Inherited from photographer's account settings */}
+        <div
+          className="relative w-full hero-section bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${heroImageData?.url || (profile?.heroImage ? `/api/hero-images/user/${profile.id}` : '')})`,
+          }}
+        >
         <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-center items-center text-white px-4">
           <div className="flex flex-col items-center max-w-3xl text-center">
             <div className="w-24 h-24 border-2 border-white mb-6 rounded-full overflow-hidden bg-primary/20 flex items-center justify-center">
@@ -312,7 +314,8 @@ export default function Portfolio() {
           else handlePrevPhoto();
         }}
       />
-    </div>
+      </div>
+    </TemplateProvider>
   );
 }
 
