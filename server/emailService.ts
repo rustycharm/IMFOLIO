@@ -60,8 +60,19 @@ class LocalEmailService extends EventEmitter {
 const localEmailService = new LocalEmailService();
 
 function createExternalTransporter() {
-  // Use local SMTP service instead of Gmail
-  return localSMTPService;
+  // Create direct SMTP transporter for real email delivery
+  return nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.GMAIL_USER || 'noreply@imfolio.com',
+      pass: process.env.GMAIL_PASS || 'defaultpass'
+    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  });
 }
 
 export async function sendContactNotification(params: ContactEmailParams): Promise<boolean> {
