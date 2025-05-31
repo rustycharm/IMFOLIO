@@ -50,7 +50,7 @@ const PortfolioGallery = ({
       featuredPhotos: featured, 
       regularPhotos: regular 
     };
-  }, [photos, selectedCategory]);
+  }, [photos, selectedCategory, isMonochromeTemplate]);
 
   useEffect(() => {
     if (displayPhotos && Array.isArray(displayPhotos)) {
@@ -58,13 +58,16 @@ const PortfolioGallery = ({
     }
   }, [displayPhotos, setVisiblePhotos]);
 
-  // Reset carousel index when category changes
+  // Reset carousel index when category changes - only for classic template
   useEffect(() => {
-    setFeaturedPhotoIndex(0);
-  }, [selectedCategory]);
+    if (!isMonochromeTemplate) {
+      setFeaturedPhotoIndex(0);
+    }
+  }, [selectedCategory, isMonochromeTemplate]);
 
+  // Carousel navigation function - only for classic template
   const navigateCarousel = (direction: 'prev' | 'next') => {
-    if (!featuredPhotos || !featuredPhotos.length) return;
+    if (isMonochromeTemplate || !featuredPhotos || !featuredPhotos.length) return;
     
     if (direction === 'prev') {
       setFeaturedPhotoIndex(prev => 
@@ -108,7 +111,7 @@ const PortfolioGallery = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Carousel for featured photos only - Hidden for monochrome template */}
+              {/* Classic Template: Legacy Carousel */}
               {featuredPhotos.length > 0 && !isMonochromeTemplate && (
                 <div className="relative mb-16 rounded-lg overflow-hidden shadow-lg">
                   <div className="w-full aspect-[16/9] relative">
