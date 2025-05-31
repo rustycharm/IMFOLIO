@@ -1,4 +1,4 @@
-import { Photo } from "@shared/schema";
+import { PhotoResponse } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -8,9 +8,9 @@ import { useState } from "react";
 
 interface PortfolioGalleryProps {
   selectedCategory: string;
-  onPhotoClick: (photo: Photo, index: number, photos: Photo[]) => void;
-  setVisiblePhotos: (photos: Photo[]) => void;
-  photos: Photo[];
+  onPhotoClick: (photo: PhotoResponse, index: number, photos: PhotoResponse[]) => void;
+  setVisiblePhotos: (photos: PhotoResponse[]) => void;
+  photos: PhotoResponse[];
   isLoading?: boolean;
 }
 
