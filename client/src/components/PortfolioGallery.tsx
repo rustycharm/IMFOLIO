@@ -217,16 +217,7 @@ const PortfolioGallery = ({
                       >
                         {featuredPhotos[featuredPhotoIndex]?.title}
                       </motion.h4>
-                      {featuredPhotos[featuredPhotoIndex]?.description && (
-                        <motion.p 
-                          className="text-gray-300 font-light max-w-md"
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.8, delay: 0.5 }}
-                        >
-                          {featuredPhotos[featuredPhotoIndex]?.description}
-                        </motion.p>
-                      )}
+
                     </div>
                     
                     {/* Star indicator */}
