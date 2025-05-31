@@ -744,7 +744,7 @@ body:has(.template-monochrome) {
 }
 
 .template-monochrome-white .monochrome-white-hero {
-  background: linear-gradient(135deg, #e5e7eb 0%, #f9fafb 30%, #ffffff 60%, #f3f4f6 100%);
+  background: linear-gradient(to right, #e5e7eb 0%, #f9fafb 25%, #ffffff 50%, #f3f4f6 75%, #e5e7eb 100%);
   position: relative;
   overflow: hidden;
 }
@@ -753,7 +753,7 @@ body:has(.template-monochrome) {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(156, 163, 175, 0.15) 0%, transparent 70%);
+  background: linear-gradient(to right, rgba(156, 163, 175, 0.2) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(156, 163, 175, 0.2) 100%);
   pointer-events: none;
 }
 
