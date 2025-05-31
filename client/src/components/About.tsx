@@ -60,13 +60,13 @@ const About = ({ isLoggedIn = false }: AboutProps) => {
                 ) : (
                   <>
                     <p className="text-gray-700 mb-4">
-                      {`I'm ${user.firstName || 'a professional'} ${user.lastName || 'photographer'}, capturing the world through my lens. My work focuses on finding beauty in both natural landscapes and human expression.`}
+                      {`I'm ${(user as any).firstName || 'a professional'} ${(user as any).lastName || 'photographer'}, capturing moments that matter through my photography. I find inspiration in both people and places, always seeking to reveal the extraordinary in the everyday.`}
                     </p>
                     <p className="text-gray-700 mb-4">
-                      What started as a hobby during my travels has evolved into a lifelong passion. I believe photography has the unique ability to freeze moments in time, allowing us to experience emotion and beauty indefinitely.
+                      Photography is more than just taking pictures—it's about preserving memories, emotions, and the beauty that surrounds us. Through my lens, I aim to share stories that connect and inspire.
                     </p>
                     <p className="text-gray-700 mb-6">
-                      My work has been featured in various art galleries and publications. I'm available for commissions and collaborations.
+                      Welcome to my visual journey.
                     </p>
                   </>
                 )}
