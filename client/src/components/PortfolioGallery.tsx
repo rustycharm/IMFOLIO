@@ -116,7 +116,17 @@ const PortfolioGallery = ({
             >
               {/* Classic Template: Legacy Carousel */}
               {featuredPhotos.length > 0 && !isMonochromeTemplate && (
-                <div className="relative mb-16 rounded-lg overflow-hidden shadow-lg">
+                <>
+                  <motion.h3 
+                    className="text-2xl font-light tracking-wide uppercase mb-8 text-center"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                  >
+                    Featured Work
+                  </motion.h3>
+                  <div className="relative mb-16 rounded-lg overflow-hidden shadow-lg">
                   <div className="w-full aspect-[16/9] relative">
                     <AnimatePresence mode="wait">
                       <motion.div
@@ -183,6 +193,7 @@ const PortfolioGallery = ({
                     )}
                   </div>
                 </div>
+                </>
               )}
               
               {/* Monochrome Template: Featured Spotlight Layout */}
