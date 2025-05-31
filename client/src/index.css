@@ -144,12 +144,38 @@
   display: inline-block;
   width: 100%;
   margin-bottom: 1rem;
+  /* Safari-specific fixes for hover effects */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000px;
+  perspective: 1000px;
 }
 
 @media (min-width: 640px) {
   .masonry-grid .image-card {
     margin-bottom: 1.5rem;
   }
+}
+
+/* Cross-browser hover fix */
+.image-card:hover {
+  -webkit-transform: translateY(-4px) translateZ(0);
+  transform: translateY(-4px) translateZ(0);
+}
+
+.template-monochrome .image-card:hover {
+  -webkit-transform: translateY(-12px) translateZ(0);
+  transform: translateY(-12px) translateZ(0);
+}
+
+/* Ensure images don't disappear on hover in Safari */
+.image-card img {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* Animation Classes */

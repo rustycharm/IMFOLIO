@@ -290,12 +290,11 @@ const PortfolioGallery = ({
                   displayPhotos.map((photo: Photo, index: number) => (
                     <motion.div
                       key={photo.id}
-                      className={`image-card relative overflow-hidden cursor-pointer ${
+                      className={`image-card relative overflow-hidden cursor-pointer transition-transform duration-300 hover:transform ${
                         isMonochromeTemplate 
-                          ? 'mb-8' 
-                          : 'mb-4 sm:mb-6 rounded-md shadow-sm'
+                          ? 'mb-8 hover:-translate-y-3' 
+                          : 'mb-4 sm:mb-6 rounded-md shadow-sm hover:-translate-y-1'
                       }`}
-                      whileHover={{ y: isMonochromeTemplate ? -12 : -5 }}
                       onClick={() => onPhotoClick(photo, index, displayPhotos)}
                       layout
                       initial={{ opacity: 0, y: 20 }}
