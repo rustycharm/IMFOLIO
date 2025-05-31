@@ -6,7 +6,7 @@ import PortfolioGallery from "@/components/PortfolioGallery";
 import { Photo } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Instagram, Twitter, Mail, Link as LinkIcon } from "lucide-react";
+import { Camera, Instagram, Twitter, Mail, Link as LinkIcon, Globe } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import About from "@/components/About";
 import Contact from "@/components/Contact";
@@ -160,13 +160,94 @@ function PortfolioInner() {
 
   return (
     <div className={`min-h-screen portfolio-template ${currentTemplate?.id ? `template-${currentTemplate.id}` : 'template-classic'}`}>
-      {/* Hero Banner - Inherited from photographer's account settings */}
-      <div
-        className="hero-section relative w-full h-[60vh] bg-cover bg-center"
-        style={{
-          backgroundImage: `url(${heroImageData?.url || (profile?.heroImage ? `/api/hero-images/user/${profile.id}` : '')})`,
-        }}
-      >
+      
+      {/* Monochrome Template: Column-based Hero */}
+      {currentTemplate?.id === 'monochrome' ? (
+        <div className="monochrome-hero-section py-16 px-4">
+          <div className="container mx-auto max-w-4xl">
+            <div className="flex flex-col items-center text-center space-y-8">
+              
+              {/* Profile Image */}
+              <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-white/20 shadow-2xl">
+                {profile.profileImage ? (
+                  <img 
+                    src={profile.profileImage} 
+                    alt={displayName}
+                    className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                    <Camera className="w-12 h-12 text-white/70" />
+                  </div>
+                )}
+              </div>
+              
+              {/* Name */}
+              <h1 className="text-5xl md:text-7xl font-thin tracking-[0.2em] text-white mb-4">
+                {displayName}
+              </h1>
+              
+              {/* Tagline */}
+              <h2 className="text-xl md:text-2xl font-light tracking-widest text-gray-300 max-w-2xl">
+                {profile.tagline || "PHOTOGRAPHY PORTFOLIO"}
+              </h2>
+              
+              {/* About Me */}
+              {profile.aboutMe && (
+                <div className="max-w-3xl">
+                  <p className="text-gray-400 leading-relaxed text-lg font-light whitespace-pre-line">
+                    {profile.aboutMe}
+                  </p>
+                </div>
+              )}
+              
+              {/* Social Links */}
+              <div className="flex space-x-6 mt-8">
+                {profile.instagram && (
+                  <a 
+                    href={profile.instagram.startsWith('http') ? profile.instagram : `https://instagram.com/${profile.instagram}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                    className="text-gray-400 hover:text-white transition-colors duration-300"
+                  >
+                    <Instagram className="w-6 h-6" />
+                  </a>
+                )}
+                {profile.twitter && (
+                  <a 
+                    href={profile.twitter.startsWith('http') ? profile.twitter : `https://twitter.com/${profile.twitter}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    aria-label="Twitter"
+                    className="text-gray-400 hover:text-white transition-colors duration-300"
+                  >
+                    <Twitter className="w-6 h-6" />
+                  </a>
+                )}
+                {profile.website && (
+                  <a 
+                    href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    aria-label="Website"
+                    className="text-gray-400 hover:text-white transition-colors duration-300"
+                  >
+                    <Globe className="w-6 h-6" />
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Classic Template Hero */
+        <div
+          className="hero-section relative w-full h-[60vh] bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${heroImageData?.url || (profile?.heroImage ? `/api/hero-images/user/${profile.id}` : '')})`,
+          }}
+        >
         <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-white px-4">
           <div className="flex flex-col items-center max-w-3xl text-center">
             <div className="w-24 h-24 border-2 border-white mb-6 rounded-full overflow-hidden bg-primary/20 flex items-center justify-center">
@@ -198,10 +279,9 @@ function PortfolioInner() {
                   aria-label="Instagram"
                   className="text-white hover:text-primary-300 transition-colors"
                 >
-                  <Instagram size={20} />
+                  <Instagram className="w-6 h-6" />
                 </a>
               )}
-              
               {profile.twitter && (
                 <a 
                   href={profile.twitter.startsWith('http') ? profile.twitter : `https://twitter.com/${profile.twitter}`} 
@@ -210,38 +290,28 @@ function PortfolioInner() {
                   aria-label="Twitter"
                   className="text-white hover:text-primary-300 transition-colors"
                 >
-                  <Twitter size={20} />
+                  <Twitter className="w-6 h-6" />
                 </a>
               )}
-              
               {profile.website && (
                 <a 
-                  href={profile.website} 
+                  href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   aria-label="Website"
                   className="text-white hover:text-primary-300 transition-colors"
                 >
-                  <LinkIcon size={20} />
-                </a>
-              )}
-              
-              {profile.email && (
-                <a 
-                  href={`mailto:${profile.email}`} 
-                  aria-label="Email"
-                  className="text-white hover:text-primary-300 transition-colors"
-                >
-                  <Mail size={20} />
+                  <Globe className="w-6 h-6" />
                 </a>
               )}
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      )}
 
-      {/* About Section */}
-      {profile.aboutMe && (
+      {/* About Section - Only for Classic Template */}
+      {currentTemplate?.id !== 'monochrome' && profile.aboutMe && (
         <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl font-light mb-4 text-center">About</h2>

@@ -588,6 +588,53 @@
   animation: monochrome-fade-in 1s ease-out forwards;
 }
 
+/* Monochrome template styling fixes */
+.template-monochrome {
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+  min-height: 100vh;
+}
+
+/* Monochrome hero section */
+.template-monochrome .monochrome-hero-section {
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+  min-height: 80vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.template-monochrome .monochrome-hero-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Category picker fixes - ensure text is visible */
+.template-monochrome button[variant="outline"],
+.template-monochrome .justify-center button {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.template-monochrome button[variant="outline"]:hover,
+.template-monochrome .justify-center button:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: white !important;
+}
+
+/* Selected category button */
+.template-monochrome button[variant="outline"].bg-gray-100,
+.template-monochrome .justify-center button.bg-gray-100 {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-color: white !important;
+  color: white !important;
+}
+
 /* Monochrome grid layout */
 .template-monochrome .monochrome-grid {
   display: grid;
