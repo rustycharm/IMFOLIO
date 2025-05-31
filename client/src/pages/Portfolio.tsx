@@ -161,46 +161,35 @@ function PortfolioInner() {
   return (
     <div className={`min-h-screen portfolio-template ${currentTemplate?.id ? `template-${currentTemplate.id}` : 'template-classic'}`}>
       
-      {/* Monochrome White Template: Gradient Split Hero */}
+      {/* Monochrome White Template: Single Column Hero */}
       {currentTemplate?.id === 'monochrome-white' ? (
-        <div className="monochrome-white-hero min-h-[60vh] bg-gradient-to-b from-gray-100 to-white px-4 py-16">
-          <div className="container mx-auto max-w-6xl h-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 h-full items-center">
+        <div className="monochrome-white-hero min-h-[40vh] bg-gradient-to-b from-gray-100 to-white px-4 py-12">
+          <div className="container mx-auto max-w-4xl h-full">
+            <div className="flex flex-col items-center text-center space-y-6">
               
-              {/* Left Panel: Profile & Name */}
-              <div className="text-left space-y-6">
-                <div className="flex items-center space-x-6">
-                  <div className="w-24 h-24 rounded-full overflow-hidden border border-gray-200 shadow-sm">
-                    {profile.profileImage ? (
-                      <img 
-                        src={profile.profileImage} 
-                        alt={displayName}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <Camera className="w-8 h-8 text-gray-400" />
-                      </div>
-                    )}
+              {/* Dominant Profile Picture */}
+              <div className="w-32 h-32 rounded-full overflow-hidden border border-gray-200 shadow-lg">
+                {profile.profileImage ? (
+                  <img 
+                    src={profile.profileImage} 
+                    alt={displayName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                    <Camera className="w-12 h-12 text-gray-400" />
                   </div>
-                  <div>
-                    <h1 className="text-4xl font-light text-gray-900 tracking-wide">
-                      {displayName}
-                    </h1>
-                    <p className="text-lg text-gray-600 mt-2">
-                      {profile.tagline}
-                    </p>
-                  </div>
-                </div>
+                )}
               </div>
               
-              {/* Right Panel: Bio */}
-              <div className="text-center">
-                <div className="max-w-md mx-auto">
-                  <p className="text-gray-700 leading-relaxed text-lg">
-                    {profile.aboutMe}
-                  </p>
-                </div>
+              {/* Name underneath */}
+              <div>
+                <h1 className="text-4xl font-light text-gray-900 tracking-wide">
+                  {displayName}
+                </h1>
+                <p className="text-lg text-gray-600 mt-2">
+                  {profile.tagline}
+                </p>
               </div>
               
             </div>
@@ -355,7 +344,7 @@ function PortfolioInner() {
       )}
 
       {/* About Section - Only for Classic Template */}
-      {currentTemplate?.id !== 'monochrome' && profile.aboutMe && (
+      {currentTemplate?.id !== 'monochrome' && currentTemplate?.id !== 'monochrome-white' && profile.aboutMe && (
         <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl font-light mb-4 text-center">About</h2>
@@ -368,14 +357,16 @@ function PortfolioInner() {
         </section>
       )}
 
-      {/* Category Selection */}
-      <div className="container mx-auto px-4 pt-8 pb-4">
-        <CategoryCarousel
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-          variant="standard"
-        />
-      </div>
+      {/* Category Selection - Not for Monochrome White Template */}
+      {currentTemplate?.id !== 'monochrome-white' && (
+        <div className="container mx-auto px-4 pt-8 pb-4">
+          <CategoryCarousel
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+            variant="standard"
+          />
+        </div>
+      )}
 
       {/* Photo Gallery */}
       <div className="gallery-section container mx-auto px-4 pb-16 overflow-hidden">
