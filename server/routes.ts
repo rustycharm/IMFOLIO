@@ -202,7 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? photos.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0].createdAt
         : null;
 
-      // Get storage usage
+      // Get storage usage with proper aggregation
       const { getUserStorageUsage } = await import('./storage-tracking');
       const storageUsage = await getUserStorageUsage(userId);
 
@@ -213,8 +213,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         categories,
         albums: 0, // Albums not implemented yet
         lastUploadDate,
-        totalStorageUsed: storageUsage.totalBytes || 0,
-        storageQuota: 100 * 1024 * 1024, // 100MB default quota
+        totalStorageUsed: storageUsage.totalBytes,
+        storageQuota: 250 * 1024 * 1024, // 250MB default quota
       });
     } catch (error) {
       console.error("Error fetching photo stats:", error);
@@ -253,7 +253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error fetching storage usage:", error);
-      // Return safe defaults for 250MB quota
+      // Return safe defaults for 250MB quota with proper error handling
       res.json({
         usedBytes: 0,
         usedFormatted: "0 MB",

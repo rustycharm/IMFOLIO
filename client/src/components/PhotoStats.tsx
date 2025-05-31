@@ -10,18 +10,22 @@ import { useAuth } from '@/hooks/useAuth';
 export default function PhotoStats() {
   const { user } = useAuth();
 
-  // Fetch user photo statistics
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ['user', 'photo-stats'],
+  // Fetch photo statistics with error fallback
+  const { data: stats, isLoading: statsLoading, error: statsError } = useQuery({
+    queryKey: ['/api/photos/stats'],
     queryFn: () => apiRequest('/api/photos/stats'),
-    refetchOnWindowFocus: false,
+    enabled: !!user,
+    retry: 2,
+    retryDelay: 1000,
   });
 
-  // Fetch storage usage with quota information
-  const { data: storageData, isLoading: storageLoading } = useQuery({
-    queryKey: ['user', 'storage-usage'],
+  // Fetch storage usage with error fallback
+  const { data: storageData, isLoading: storageLoading, error: storageError } = useQuery({
+    queryKey: ['/api/user/storage-usage'],
     queryFn: () => apiRequest('/api/user/storage-usage'),
-    refetchOnWindowFocus: false,
+    enabled: !!user,
+    retry: 2,
+    retryDelay: 1000,
   });
 
   // Format bytes to human-readable size
