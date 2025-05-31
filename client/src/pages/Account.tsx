@@ -137,9 +137,9 @@ export default function Account() {
         username: (user as any).username || "",
         firstName: (user as any).firstName || "",
         lastName: (user as any).lastName || "",
-        tagline: (user as any).profile?.tagline || "",
-        bio: (user as any).profile?.bio || "",
-        portfolioUrlType: (user as any).profile?.portfolioUrlType || "username"
+        tagline: (user as any).tagline || "",
+        bio: (user as any).bio || "",
+        portfolioUrlType: (user as any).portfolioUrlType || "username"
       });
     }
   }, [user]);
