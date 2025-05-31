@@ -159,10 +159,10 @@ function PortfolioInner() {
     : profile.username;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className={`min-h-screen portfolio-template ${currentTemplate?.id ? `template-${currentTemplate.id}` : 'template-classic'}`}>
       {/* Hero Banner - Inherited from photographer's account settings */}
       <div
-        className="relative w-full h-[60vh] bg-cover bg-center"
+        className="hero-section relative w-full h-[60vh] bg-cover bg-center"
         style={{
           backgroundImage: `url(${heroImageData?.url || (profile?.heroImage ? `/api/hero-images/user/${profile.id}` : '')})`,
         }}
@@ -264,7 +264,7 @@ function PortfolioInner() {
       </div>
 
       {/* Photo Gallery */}
-      <div className="container mx-auto px-4 pb-16">
+      <div className="gallery-section container mx-auto px-4 pb-16">
         {isPhotosLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[...Array(8)].map((_, i) => (
@@ -315,6 +315,15 @@ function PortfolioInner() {
         }}
       />
     </div>
+  );
+}
+
+// Main Portfolio component with template provider
+export default function Portfolio() {
+  return (
+    <TemplateProvider>
+      <PortfolioInner />
+    </TemplateProvider>
   );
 }
 
