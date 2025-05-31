@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-import { createServer } from 'http';
 import { EventEmitter } from 'events';
 
 interface ContactEmailParams {
@@ -21,7 +20,6 @@ interface EmailMessage {
   status: 'pending' | 'delivered' | 'failed';
 }
 
-// Simple local email queue and notification system
 class LocalEmailService extends EventEmitter {
   private emails: EmailMessage[] = [];
   private maxEmails = 100; // Keep last 100 emails
@@ -31,7 +29,7 @@ class LocalEmailService extends EventEmitter {
       ...email,
       id: `email_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date(),
-      status: 'pending'
+      status: 'delivered'
     };
 
     this.emails.unshift(emailWithMeta);
@@ -41,15 +39,12 @@ class LocalEmailService extends EventEmitter {
       this.emails = this.emails.slice(0, this.maxEmails);
     }
 
-    // Mark as delivered immediately since it's local storage
-    emailWithMeta.status = 'delivered';
-    
     this.emit('newEmail', emailWithMeta);
     return emailWithMeta.id;
   }
 
   getEmails(): EmailMessage[] {
-    return this.emails;
+    return [...this.emails];
   }
 
   getEmailById(id: string): EmailMessage | undefined {
@@ -57,24 +52,22 @@ class LocalEmailService extends EventEmitter {
   }
 
   getEmailsForRecipient(email: string): EmailMessage[] {
-    return this.emails.filter(e => e.to.toLowerCase() === email.toLowerCase());
+    return this.emails.filter(e => e.to.toLowerCase().includes(email.toLowerCase()));
   }
 }
 
-// Global instance
 const localEmailService = new LocalEmailService();
 
-// Create fallback transporter for external email if credentials provided
 function createExternalTransporter() {
-  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
     return null;
   }
 
-  return nodemailer.createTransport({
+  return nodemailer.createTransporter({
     service: 'gmail',
     auth: {
       user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
+      pass: process.env.GMAIL_PASS,
     },
   });
 }
@@ -216,12 +209,6 @@ Powered by IMFOLIO.COM - Professional Photography Portfolio Platform
     console.log(params.message);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('📥 Email stored locally - check admin dashboard for full details\n');
-        });
-        console.log(`✅ External email notification also sent to ${params.adminEmail}`);
-      } catch (externalError) {
-        console.warn('⚠️ External email failed, but message is stored locally:', externalError);
-      }
-    }
 
     return true;
 
