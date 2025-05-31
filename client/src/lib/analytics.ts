@@ -23,13 +23,17 @@ export const initGA = () => {
 
   // Initialize gtag
   const script2 = document.createElement('script');
-  script2.innerHTML = `
+  script2.textContent = `
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', '${measurementId}');
   `;
   document.head.appendChild(script2);
+  
+  // Configure gtag safely using the API instead of string interpolation
+  if (window.gtag) {
+    window.gtag('config', measurementId);
+  }
 };
 
 // Track page views - useful for single-page applications
