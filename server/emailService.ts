@@ -1,7 +1,4 @@
 import nodemailer from 'nodemailer';
-import { EventEmitter } from 'events';
-import { localSMTPService } from './localSMTP';
-import sgMail from '@sendgrid/mail';
 
 interface ContactEmailParams {
   name: string;
@@ -11,56 +8,7 @@ interface ContactEmailParams {
   adminEmail: string;
 }
 
-interface EmailMessage {
-  id: string;
-  from: string;
-  to: string;
-  subject: string;
-  html: string;
-  text: string;
-  timestamp: Date;
-  status: 'pending' | 'delivered' | 'failed';
-}
-
-class LocalEmailService extends EventEmitter {
-  private emails: EmailMessage[] = [];
-  private maxEmails = 100; // Keep last 100 emails
-
-  addEmail(email: Omit<EmailMessage, 'id' | 'timestamp' | 'status'>): string {
-    const emailWithMeta: EmailMessage = {
-      ...email,
-      id: `email_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      timestamp: new Date(),
-      status: 'delivered'
-    };
-
-    this.emails.unshift(emailWithMeta);
-    
-    // Keep only the most recent emails
-    if (this.emails.length > this.maxEmails) {
-      this.emails = this.emails.slice(0, this.maxEmails);
-    }
-
-    this.emit('newEmail', emailWithMeta);
-    return emailWithMeta.id;
-  }
-
-  getEmails(): EmailMessage[] {
-    return [...this.emails];
-  }
-
-  getEmailById(id: string): EmailMessage | undefined {
-    return this.emails.find(email => email.id === id);
-  }
-
-  getEmailsForRecipient(email: string): EmailMessage[] {
-    return this.emails.filter(e => e.to.toLowerCase().includes(email.toLowerCase()));
-  }
-}
-
-const localEmailService = new LocalEmailService();
-
-function createExternalTransporter() {
+function createGmailTransporter() {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
     return null;
   }
@@ -76,6 +24,13 @@ function createExternalTransporter() {
 
 export async function sendContactNotification(params: ContactEmailParams): Promise<boolean> {
   try {
+    const transporter = createGmailTransporter();
+    
+    if (!transporter) {
+      console.warn('Gmail SMTP not configured - skipping real email delivery');
+      return false;
+    }
+
     // Create formatted email content with IMFOLIO branding
     const htmlContent = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
@@ -103,42 +58,30 @@ export async function sendContactNotification(params: ContactEmailParams): Promi
             </div>
             <div style="margin-bottom: 15px;">
               <span style="font-weight: 600; color: #555;">Email:</span> 
-              <a href="mailto:${params.email}" style="color: #667eea; text-decoration: none;">${params.email}</a>
-            </div>
-            <div style="margin-bottom: 15px;">
-              <span style="font-weight: 600; color: #555;">Subject:</span> 
-              <span style="color: #333;">${params.subject}</span>
+              <span style="color: #333;">${params.email}</span>
             </div>
             <div>
-              <span style="font-weight: 600; color: #555;">Time:</span> 
-              <span style="color: #333;">${new Date().toLocaleString()}</span>
+              <span style="font-weight: 600; color: #555;">Subject:</span> 
+              <span style="color: #333;">${params.subject}</span>
             </div>
           </div>
           
           <!-- Message Content -->
-          <div style="background: #fff; padding: 25px; border: 1px solid #e9ecef; border-radius: 8px;">
-            <h3 style="color: #555; margin: 0 0 15px 0; font-size: 16px; font-weight: 600;">Message:</h3>
-            <div style="line-height: 1.6; color: #333; font-size: 15px;">
-              ${params.message.replace(/\n/g, '<br>')}
-            </div>
+          <div style="background: #ffffff; padding: 25px; border: 1px solid #e9ecef; border-radius: 8px; margin: 25px 0;">
+            <h3 style="color: #333; margin: 0 0 15px 0; font-size: 16px; font-weight: 600;">
+              Message:
+            </h3>
+            <div style="color: #555; line-height: 1.6; white-space: pre-wrap;">${params.message}</div>
           </div>
           
-          <!-- Reply Notice -->
-          <div style="margin-top: 30px; padding: 20px; background: #e8f4f8; border-radius: 6px;">
-            <p style="margin: 0; color: #666; font-size: 13px; text-align: center;">
-              Reply directly to this email to respond to <strong>${params.name}</strong>
+          <!-- Footer -->
+          <div style="text-align: center; padding: 20px 0; border-top: 1px solid #e9ecef; margin-top: 30px;">
+            <p style="color: #888; font-size: 12px; margin: 0;">
+              This message was sent from your IMFOLIO portfolio contact form
             </p>
           </div>
         </div>
-        
-        <!-- IMFOLIO Footer -->
-        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e9ecef;">
-          <p style="margin: 0; color: #999; font-size: 12px;">
-            Powered by <strong style="color: #667eea;">IMFOLIO.COM</strong> - Professional Photography Portfolio Platform
-          </p>
-        </div>
-      </div>
-    `;
+      </div>`;
 
     const textContent = `
 IMFOLIO - New Contact Form Submission
@@ -146,89 +89,28 @@ IMFOLIO - New Contact Form Submission
 From: ${params.name}
 Email: ${params.email}
 Subject: ${params.subject}
-Time: ${new Date().toLocaleString()}
 
 Message:
 ${params.message}
 
-Reply directly to this email to respond to ${params.name}.
-
 ---
-Powered by IMFOLIO.COM - Professional Photography Portfolio Platform
-    `;
+This message was sent from your IMFOLIO portfolio contact form`;
 
-    // Try to send real email first (if Gmail credentials are configured)
-    const externalTransporter = createExternalTransporter();
-    
-    if (externalTransporter) {
-      try {
-        await externalTransporter.sendMail({
-          from: '"IMFOLIO Contact Form" <noreply@imfolio.com>',
-          to: params.adminEmail,
-          replyTo: params.email,
-          subject: `IMFOLIO Contact: ${params.subject}`,
-          text: textContent,
-          html: htmlContent,
-        });
-        
-        console.log(`📧 Real IMFOLIO email sent successfully to ${params.adminEmail}`);
-        
-        // Also store in local service for admin dashboard viewing
-        localEmailService.addEmail({
-          from: `${params.name} <${params.email}>`,
-          to: params.adminEmail,
-          subject: `IMFOLIO Contact: ${params.subject}`,
-          html: htmlContent,
-          text: textContent
-        });
-        
-        return true;
-      } catch (externalError) {
-        console.warn(`Failed to send external email to ${params.adminEmail}:`, externalError);
-        // Fall through to local storage only
-      }
-    }
-
-    // If external email failed or not configured, store in local service only
-    const emailId = localEmailService.addEmail({
-      from: `${params.name} <${params.email}>`,
+    // Send the email
+    await transporter.sendMail({
+      from: `"IMFOLIO Contact Form" <${process.env.GMAIL_USER}>`,
       to: params.adminEmail,
+      replyTo: `"${params.name}" <${params.email}>`,
       subject: `IMFOLIO Contact: ${params.subject}`,
       html: htmlContent,
       text: textContent
     });
 
-    // Log to console for immediate visibility
-    console.log('\n📧 Contact Form Submission Received:');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(`📬 To: ${params.adminEmail}`);
-    console.log(`👤 From: ${params.name} (${params.email})`);
-    console.log(`📝 Subject: IMFOLIO Contact: ${params.subject}`);
-    console.log(`🆔 Email ID: ${emailId}`);
-    console.log(`⏰ Time: ${new Date().toLocaleString()}`);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('💬 Message:');
-    console.log(params.message);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('📥 Email stored locally - check admin dashboard for full details\n');
-
+    console.log(`📧 Real IMFOLIO email sent successfully to ${params.adminEmail}`);
     return true;
 
   } catch (error) {
-    console.error('❌ Email service error:', error);
+    console.error('Gmail email sending error:', error);
     return false;
   }
-}
-
-// Export local email service for API access
-export function getLocalEmails(): EmailMessage[] {
-  return localEmailService.getEmails();
-}
-
-export function getLocalEmailById(id: string): EmailMessage | undefined {
-  return localEmailService.getEmailById(id);
-}
-
-export function getLocalEmailsForRecipient(email: string): EmailMessage[] {
-  return localEmailService.getEmailsForRecipient(email);
 }
