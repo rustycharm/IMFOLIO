@@ -635,6 +635,22 @@
   color: white !important;
 }
 
+/* Footer styling for monochrome template */
+.template-monochrome footer {
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%) !important;
+  color: white !important;
+}
+
+.template-monochrome footer h3,
+.template-monochrome footer p,
+.template-monochrome footer a {
+  color: white !important;
+}
+
+.template-monochrome footer a:hover {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
 /* Monochrome grid layout */
 .template-monochrome .monochrome-grid {
   display: grid;

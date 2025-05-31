@@ -364,11 +364,11 @@ function PortfolioInner() {
         )}
       </div>
 
-      {/* About Section */}
-      <About />
+      {/* About Section - Hidden for monochrome template */}
+      {currentTemplate?.id !== 'monochrome' && <About />}
 
-      {/* Contact Section */}
-      <Contact />
+      {/* Contact Section - Hidden for monochrome template */}
+      {currentTemplate?.id !== 'monochrome' && <Contact />}
 
       {/* Footer */}
       <Footer />
