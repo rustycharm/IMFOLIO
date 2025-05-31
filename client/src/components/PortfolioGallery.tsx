@@ -373,14 +373,7 @@ const PortfolioGallery = ({
                           </div>
                         </div>
 
-                        {/* Featured indicator for river featured photos */}
-                        {photo.isRiverFeatured && (
-                          <div className="absolute top-3 right-3">
-                            <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full">
-                              <span className="text-black text-xs font-medium">FEATURED</span>
-                            </div>
-                          </div>
-                        )}
+
                       </motion.div>
                     ))
                   ) : (

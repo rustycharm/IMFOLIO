@@ -168,7 +168,7 @@ function PortfolioInner() {
             <div className="flex flex-col items-center text-center space-y-6">
               
               {/* Dominant Profile Picture */}
-              <div className="w-32 h-32 rounded-full overflow-hidden border border-gray-200 shadow-lg">
+              <div className="w-48 h-48 rounded-full overflow-hidden border border-gray-200 shadow-lg">
                 {profile.profileImage ? (
                   <img 
                     src={profile.profileImage} 
