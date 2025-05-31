@@ -512,42 +512,56 @@ export default function Account() {
           </TabsList>
 
           <TabsContent value="profile" className="p-4 border rounded-md mt-4">
-            <ProfileEditForm 
-              formData={formData}
-              setFormData={setFormData}
-              onSave={() => {
-                updateProfileMutation.mutate(formData, {
-                  onSuccess: () => {
-                    // Add a small delay to ensure database update is complete
-                    setTimeout(() => {
-                      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-                    }, 500);
-                  }
-                });
-              }}
-              onCancel={() => {
-                // Reset form data to original values when canceling
-                if (user) {
-                  setFormData({
-                    username: (user as any).username || "",
-                    firstName: (user as any).firstName || "",
-                    lastName: (user as any).lastName || "",
-                    tagline: (user as any).profile?.tagline || "",
-                    bio: (user as any).profile?.bio || "",
-                    portfolioUrlType: (user as any).profile?.portfolioUrlType || "username"
-                  });
-                }
-              }}
-              isPending={updateProfileMutation.isPending}
-            />
+            <div className="space-y-8">
+              {/* Profile Information Section */}
+              <div>
+                <h3 className="text-xl font-semibold mb-4">Profile Information</h3>
+                <ProfileEditForm 
+                  formData={formData}
+                  setFormData={setFormData}
+                  onSave={() => {
+                    updateProfileMutation.mutate(formData, {
+                      onSuccess: () => {
+                        // Add a small delay to ensure database update is complete
+                        setTimeout(() => {
+                          queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+                        }, 500);
+                      }
+                    });
+                  }}
+                  onCancel={() => {
+                    // Reset form data to original values when canceling
+                    if (user) {
+                      setFormData({
+                        username: (user as any).username || "",
+                        firstName: (user as any).firstName || "",
+                        lastName: (user as any).lastName || "",
+                        tagline: (user as any).profile?.tagline || "",
+                        bio: (user as any).profile?.bio || "",
+                        portfolioUrlType: (user as any).profile?.portfolioUrlType || "username"
+                      });
+                    }
+                  }}
+                  isPending={updateProfileMutation.isPending}
+                />
+              </div>
+
+              {/* Profile Picture Section */}
+              <div className="border-t pt-8">
+                <h3 className="text-xl font-semibold mb-4">Profile Picture</h3>
+                <ProfilePictureManager />
+              </div>
+
+              {/* Hero Banner Section */}
+              <div className="border-t pt-8">
+                <h3 className="text-xl font-semibold mb-4">Hero Banner</h3>
+                <HeroImageManager />
+              </div>
+            </div>
           </TabsContent>
 
-          <TabsContent value="hero" className="p-4 border rounded-md mt-4">
-            <HeroImageManager />
-          </TabsContent>
-
-          <TabsContent value="avatar" className="p-4 border rounded-md mt-4">
-            <ProfilePictureManager />
+          <TabsContent value="portfolio" className="p-4 border rounded-md mt-4">
+            <PortfolioCustomization />
           </TabsContent>
 
           <TabsContent value="photos" className="p-4 border rounded-md mt-4">
