@@ -496,76 +496,74 @@ function PortfolioInner() {
         </section>
       )}
 
-      {/* Epic Template: Apple-inspired Gallery Section */}
+      {/* Epic Template: Full-Screen Photo Panels */}
       {currentTemplate?.id === 'epic' ? (
-        <div className="epic-gallery epic-section">
-          <div className="container mx-auto px-8">
-            {/* About section for Epic template */}
-            {profile.aboutMe && (
-              <div className="text-center mb-20">
-                <h2 className="text-5xl font-semibold text-gray-900 mb-8 leading-tight">
-                  About the Artist
-                </h2>
-                <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-                  {profile.aboutMe}
-                </p>
+        <>
+          {/* About section for Epic template */}
+          {profile.aboutMe && (
+            <div className="epic-about-section">
+              <div className="epic-about-content">
+                <h2>About the Artist</h2>
+                <p>{profile.aboutMe}</p>
               </div>
-            )}
-            
-            {/* Category selection for Epic */}
-            <div className="mb-16">
-              <CategoryCarousel
-                selectedCategory={selectedCategory}
-                onCategoryChange={setSelectedCategory}
-                variant="standard"
-              />
             </div>
-            
-            {/* Epic grid layout */}
-            <div className="epic-grid">
-              {isPhotosLoading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="epic-card">
-                    <Skeleton className="w-full h-80" />
-                  </div>
-                ))
-              ) : photosError || !photos ? (
-                <div className="col-span-full text-center py-20">
-                  <p className="text-xl text-gray-500">Unable to load photos. Please try again later.</p>
-                </div>
-              ) : photos.length === 0 ? (
-                <div className="col-span-full text-center py-20">
-                  <p className="text-xl text-gray-500">No photos found for this category.</p>
-                </div>
-              ) : (
-                photos
-                  .filter(photo => !selectedCategory || selectedCategory === 'all' || photo.category === selectedCategory)
-                  .map((photo: any, index: number) => (
-                    <div
-                      key={photo.id}
-                      className="epic-card cursor-pointer group"
-                      onClick={() => handlePhotoClick(photo, index)}
-                    >
-                      <div className="aspect-[4/3] overflow-hidden">
-                        <img
-                          src={photo.imageUrl}
-                          alt={photo.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      </div>
-                      <div className="p-6">
-                        <h3 className="font-semibold text-lg text-gray-900 mb-2">{photo.title}</h3>
-                        {photo.description && (
-                          <p className="text-gray-600 text-sm leading-relaxed">{photo.description}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))
-              )}
-            </div>
+          )}
+          
+          {/* Category selection for Epic */}
+          <div className="epic-category-section">
+            <CategoryCarousel
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+              variant="standard"
+            />
           </div>
-        </div>
+          
+          {/* Epic Photo Panels - Each photo is a full screen */}
+          {isPhotosLoading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="epic-photo-panel" style={{ backgroundColor: '#f5f5f5' }}>
+                <div className="epic-photo-content">
+                  <div className="epic-photo-title">Loading...</div>
+                  <div className="epic-photo-description">Please wait while photos load</div>
+                </div>
+              </div>
+            ))
+          ) : photosError || !photos ? (
+            <div className="epic-photo-panel" style={{ backgroundColor: '#f5f5f5' }}>
+              <div className="epic-photo-content">
+                <div className="epic-photo-title">Unable to load photos</div>
+                <div className="epic-photo-description">Please try again later</div>
+              </div>
+            </div>
+          ) : photos.length === 0 ? (
+            <div className="epic-photo-panel" style={{ backgroundColor: '#f5f5f5' }}>
+              <div className="epic-photo-content">
+                <div className="epic-photo-title">No photos available</div>
+                <div className="epic-photo-description">Upload some photos to see them here</div>
+              </div>
+            </div>
+          ) : (
+            photos
+              .filter(photo => !selectedCategory || selectedCategory === 'all' || photo.category === selectedCategory)
+              .map((photo: any, index: number) => (
+                <div
+                  key={photo.id}
+                  className="epic-photo-panel"
+                  style={{
+                    backgroundImage: `url("${photo.imageUrl}")`,
+                  }}
+                  onClick={() => handlePhotoClick(photo, index)}
+                >
+                  <div className="epic-photo-content">
+                    <div className="epic-photo-title">{photo.title}</div>
+                    {photo.description && (
+                      <div className="epic-photo-description">{photo.description}</div>
+                    )}
+                  </div>
+                </div>
+              ))
+          )}
+        </>
       ) : (
         <>
           {/* Category Selection - For non-Epic templates */}

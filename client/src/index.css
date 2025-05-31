@@ -300,24 +300,24 @@
   --monochrome-gradient: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
 }
 
-/* Epic Template - Apple-inspired */
+/* Epic Template - Imfolio Epic Design */
 .template-epic {
   --template-primary: #000000;
   --template-secondary: #ffffff;
   --template-accent: #f5f5f7;
   --template-text: #1d1d1f;
-  --template-text-light: #86868b;
+  --template-text-light: #666666;
   --template-background: #ffffff;
   --template-card-bg: #fbfbfd;
   --template-border: #d2d2d7;
-  --template-heading-weight: 600;
+  --template-heading-weight: 300;
   --template-body-weight: 400;
   
   /* Epic-specific properties */
   --epic-hero-height: 100vh;
-  --epic-section-padding: 120px 0;
-  --epic-border-radius: 18px;
-  --epic-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --epic-section-padding: 0;
+  --epic-border-radius: 0;
+  --epic-shadow: none;
   --epic-transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
@@ -617,9 +617,10 @@
   position: relative;
 }
 
-/* Epic Template Apple-inspired Styles */
+/* Epic Template - Full-Screen Panels */
 .template-epic {
   scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
 }
 
 .template-epic .epic-hero {
@@ -631,6 +632,7 @@
   display: flex;
   align-items: flex-end;
   transition: var(--epic-transition);
+  scroll-snap-align: start;
 }
 
 .template-epic .epic-hero::before {
@@ -661,6 +663,7 @@
   line-height: 1.1;
   margin-bottom: 1rem;
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+  font-family: 'Montserrat', sans-serif;
 }
 
 .template-epic .epic-hero p {
@@ -670,6 +673,7 @@
   letter-spacing: 0.01em;
   margin-bottom: 2rem;
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+  font-family: 'Montserrat', sans-serif;
 }
 
 .template-epic .epic-section {
@@ -680,30 +684,109 @@
   scroll-snap-align: start;
 }
 
-.template-epic .epic-gallery {
-  background: var(--template-background);
-  scroll-snap-type: y mandatory;
+.template-epic .epic-about-section {
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  scroll-snap-align: start;
+  padding: 120px 0;
 }
 
-.template-epic .epic-card {
-  background: var(--template-card-bg);
-  border-radius: var(--epic-border-radius);
-  box-shadow: var(--epic-shadow);
-  overflow: hidden;
-  transition: var(--epic-transition);
-  border: 1px solid var(--template-border);
-}
-
-.template-epic .epic-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
-
-.template-epic .epic-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 2rem;
+.template-epic .epic-about-content {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
   padding: 0 2rem;
+}
+
+.template-epic .epic-about-content h2 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: var(--template-heading-weight);
+  color: var(--template-text);
+  margin-bottom: 2rem;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.template-epic .epic-about-content p {
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  color: var(--template-text-light);
+  line-height: 1.6;
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* Epic Photo Panels - Each photo is a full screen */
+.template-epic .epic-photo-panel {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  align-items: flex-end;
+  scroll-snap-align: start;
+  cursor: pointer;
+  transition: var(--epic-transition);
+}
+
+.template-epic .epic-photo-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, 
+    transparent 0%, 
+    transparent 60%, 
+    rgba(0, 0, 0, 0.3) 80%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  transition: var(--epic-transition);
+}
+
+.template-epic .epic-photo-panel:hover::before {
+  background: linear-gradient(to bottom, 
+    transparent 0%, 
+    transparent 50%, 
+    rgba(0, 0, 0, 0.4) 70%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+}
+
+.template-epic .epic-photo-content {
+  position: relative;
+  z-index: 10;
+  padding: 0 80px 80px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.template-epic .epic-photo-title {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: var(--template-heading-weight);
+  color: white;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+  font-family: 'Montserrat', sans-serif;
+}
+
+.template-epic .epic-photo-description {
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 300;
+}
+
+.template-epic .epic-category-section {
+  min-height: 30vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--template-background);
+  scroll-snap-align: start;
+  padding: 60px 0;
 }
 
 .template-epic .epic-profile {
@@ -721,13 +804,15 @@
     background-attachment: scroll;
   }
   
-  .template-epic .epic-section {
-    padding: 60px 0;
-    min-height: auto;
+  .template-epic .epic-photo-panel {
+    background-attachment: scroll;
   }
   
-  .template-epic .epic-grid {
-    grid-template-columns: 1fr;
+  .template-epic .epic-photo-content {
+    padding: 0 40px 60px;
+  }
+  
+  .template-epic .epic-about-content {
     padding: 0 1rem;
   }
 }
