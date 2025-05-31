@@ -205,7 +205,7 @@ const PortfolioGallery = ({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8 }}
                   >
-                    Featured Works
+                    FEATURED
                   </motion.h3>
                   
                   {/* Main featured photo spotlight */}
