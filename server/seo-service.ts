@@ -99,7 +99,7 @@ export async function generatePortfolioSEO(
 // Valid categories that match the frontend dropdown
 const VALID_CATEGORIES = [
   'portrait', 'landscape', 'street', 'nature', 'architecture', 
-  'travel', 'event', 'macro', 'wildlife', 'abstract', 'other'
+  'travel', 'macro', 'artistic', 'black-and-white', 'other'
 ];
 
 /**
@@ -124,7 +124,7 @@ export async function generateImageSEO(
     Focus on descriptive, searchable terms that photographers and viewers would use.
     
     IMPORTANT: For category, you must choose ONE of these exact values:
-    portrait, landscape, street, nature, architecture, travel, event, macro, wildlife, abstract, other
+    portrait, landscape, street, nature, architecture, travel, macro, artistic, black-and-white, other
     
     Respond with JSON in this format:
     {
