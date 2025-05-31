@@ -618,7 +618,7 @@ body:has(.template-monochrome) {
 /* Monochrome hero section */
 .template-monochrome .monochrome-hero-section {
   background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
-  min-height: 80vh;
+  min-height: auto;
   position: relative;
   overflow: hidden;
 }
