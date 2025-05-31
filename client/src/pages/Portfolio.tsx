@@ -169,9 +169,13 @@ function PortfolioInner() {
           <div className="container mx-auto h-full px-16 py-16 relative z-10">
             <div className="flex items-center space-x-12 max-w-5xl ml-8">
               
-              {/* Portrait Profile Picture with Blur Effect */}
+              {/* Portrait Profile Picture with Enhanced Effects */}
               <div className="relative">
-                <div className="w-48 h-64 overflow-hidden shadow-2xl relative">
+                {/* Soft background glow */}
+                <div className="absolute -inset-8 bg-gradient-to-r from-white/60 via-gray-100/40 to-white/60 rounded-lg blur-2xl opacity-70"></div>
+                
+                {/* Main profile picture container */}
+                <div className="relative w-48 h-64 overflow-hidden rounded-lg shadow-2xl border-2 border-white/50 backdrop-blur-sm">
                   {profile.profileImage ? (
                     <>
                       <img 
@@ -179,14 +183,11 @@ function PortfolioInner() {
                         alt={displayName}
                         className="w-full h-full object-cover"
                       />
-                      {/* Blur overlay extending to background */}
-                      <div 
-                        className="absolute inset-0 bg-cover bg-center opacity-30 blur-xl scale-150 -z-10"
-                        style={{ 
-                          backgroundImage: `url(${profile.profileImage})`,
-                          transform: 'scale(2) translateX(50%)'
-                        }}
-                      />
+                      {/* Subtle inner border highlight */}
+                      <div className="absolute inset-0 border border-white/30 rounded-lg pointer-events-none"></div>
+                      
+                      {/* Edge fade effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20 pointer-events-none"></div>
                     </>
                   ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -194,6 +195,19 @@ function PortfolioInner() {
                     </div>
                   )}
                 </div>
+                
+                {/* Extended blur effect behind */}
+                {profile.profileImage && (
+                  <div 
+                    className="absolute -inset-12 opacity-20 blur-3xl -z-10"
+                    style={{ 
+                      backgroundImage: `url(${profile.profileImage})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      transform: 'scale(1.5)'
+                    }}
+                  />
+                )}
               </div>
               
               {/* Text Content - Left Aligned */}
