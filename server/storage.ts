@@ -6,6 +6,8 @@ import {
   heroImages,
   userHeroSelections,
   storageUsage,
+  portfolioTemplates,
+  userTemplateSelections,
   type User,
   type UpsertUser,
   type Photo,
@@ -17,6 +19,9 @@ import {
   type StorageUsage,
   type InsertStorageUsage,
   type InsertPhoto,
+  type PortfolioTemplate,
+  type UserTemplateSelection,
+  type InsertUserTemplateSelection,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql, and, desc } from "drizzle-orm";

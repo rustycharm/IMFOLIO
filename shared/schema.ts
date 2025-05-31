@@ -132,6 +132,34 @@ export const storageUsage = pgTable("storage_usage", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Portfolio templates table - system-defined design templates
+export const portfolioTemplates = pgTable("portfolio_templates", {
+  id: varchar("id").primaryKey(), // e.g., 'monochrome', 'classic', 'modern'
+  name: text("name").notNull(), // Display name
+  description: text("description"), // Template description
+  category: text("category").notNull(), // 'minimal', 'artistic', 'commercial', etc.
+  isActive: boolean("is_active").default(true).notNull(),
+  isDefault: boolean("is_default").default(false).notNull(),
+  // Template styling configuration
+  colorScheme: jsonb("color_scheme").notNull(), // Primary colors, backgrounds, text colors
+  typography: jsonb("typography").notNull(), // Font families, weights, sizes
+  layout: jsonb("layout").notNull(), // Gallery layout, spacing, component arrangements
+  effects: jsonb("effects"), // Animations, transitions, hover effects
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// User template selections table - tracks which template each user is using
+export const userTemplateSelections = pgTable("user_template_selections", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  templateId: varchar("template_id").references(() => portfolioTemplates.id).notNull(),
+  customizations: jsonb("customizations"), // Future: user-specific overrides
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const insertPhotoSchema = createInsertSchema(photos).omit({
   id: true,
   createdAt: true,
@@ -167,6 +195,17 @@ export const updateProfileSchema = createInsertSchema(profiles).omit({
   updatedAt: true,
 }).partial();
 
+export const insertPortfolioTemplateSchema = createInsertSchema(portfolioTemplates).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserTemplateSelectionSchema = createInsertSchema(userTemplateSelections).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type Photo = typeof photos.$inferSelect;
@@ -175,9 +214,13 @@ export type Message = typeof messages.$inferSelect;
 export type HeroImage = typeof heroImages.$inferSelect;
 export type UserHeroSelection = typeof userHeroSelections.$inferSelect;
 export type StorageUsage = typeof storageUsage.$inferSelect;
+export type PortfolioTemplate = typeof portfolioTemplates.$inferSelect;
+export type UserTemplateSelection = typeof userTemplateSelections.$inferSelect;
 export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type InsertUserHeroSelection = z.infer<typeof insertUserHeroSelectionSchema>;
 export type InsertStorageUsage = z.infer<typeof insertStorageUsageSchema>;
 export type InsertProfile = z.infer<typeof insertProfileSchema>;
 export type UpdateProfile = z.infer<typeof updateProfileSchema>;
+export type InsertPortfolioTemplate = z.infer<typeof insertPortfolioTemplateSchema>;
+export type InsertUserTemplateSelection = z.infer<typeof insertUserTemplateSelectionSchema>;
