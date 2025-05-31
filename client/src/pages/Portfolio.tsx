@@ -164,8 +164,8 @@ function PortfolioInner() {
       {/* Monochrome White Template: Portrait Hero */}
       {currentTemplate?.id === 'monochrome-white' ? (
         <div className="monochrome-white-hero relative min-h-[50vh] bg-gradient-to-b from-gray-100 to-white overflow-hidden">
-          <div className="container mx-auto h-full px-8 py-16 relative z-10">
-            <div className="flex items-center space-x-8 max-w-4xl">
+          <div className="container mx-auto h-full px-16 py-16 relative z-10">
+            <div className="flex items-center space-x-12 max-w-5xl ml-8">
               
               {/* Portrait Profile Picture with Blur Effect */}
               <div className="relative">
@@ -370,7 +370,7 @@ function PortfolioInner() {
       )}
 
       {/* Category Selection */}
-      <div className="container mx-auto px-4 pt-8 pb-4">
+      <div className={`container mx-auto px-4 pt-8 ${currentTemplate?.id === 'monochrome-white' ? 'pb-12' : 'pb-4'}`}>
         <CategoryCarousel
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
