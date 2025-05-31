@@ -504,11 +504,11 @@ export default function Account() {
         )}
 
         <Tabs defaultValue="photos" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full overflow-x-auto flex md:grid md:grid-cols-4 gap-2 md:gap-0 p-1">
-            <TabsTrigger value="photos" className="whitespace-nowrap flex-shrink-0">My Photos</TabsTrigger>
-            <TabsTrigger value="profile" className="whitespace-nowrap flex-shrink-0">Edit Profile</TabsTrigger>
-            <TabsTrigger value="portfolio" className="whitespace-nowrap flex-shrink-0">Portfolio</TabsTrigger>
-            <TabsTrigger value="settings" className="whitespace-nowrap flex-shrink-0">Settings</TabsTrigger>
+          <TabsList className="w-full overflow-x-auto flex md:grid md:grid-cols-4 gap-2 md:gap-0 p-1 bg-gray-100 text-gray-700">
+            <TabsTrigger value="photos" className="whitespace-nowrap flex-shrink-0 text-gray-700 data-[state=active]:bg-white data-[state=active]:text-black">My Photos</TabsTrigger>
+            <TabsTrigger value="profile" className="whitespace-nowrap flex-shrink-0 text-gray-700 data-[state=active]:bg-white data-[state=active]:text-black">Edit Profile</TabsTrigger>
+            <TabsTrigger value="portfolio" className="whitespace-nowrap flex-shrink-0 text-gray-700 data-[state=active]:bg-white data-[state=active]:text-black">Portfolio</TabsTrigger>
+            <TabsTrigger value="settings" className="whitespace-nowrap flex-shrink-0 text-gray-700 data-[state=active]:bg-white data-[state=active]:text-black">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="p-4 border rounded-md mt-4">
