@@ -763,17 +763,17 @@
 }
 
 .template-epic .epic-photo-title {
-  font-size: clamp(1.2rem, 2.5vw, 2rem);
+  font-size: clamp(1rem, 1.8vw, 1.4rem);
   font-weight: var(--template-heading-weight);
   color: white;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
   text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
   font-family: 'Montserrat', sans-serif;
 }
 
 .template-epic .epic-photo-description {
-  font-size: clamp(1rem, 2vw, 1.3rem);
-  color: rgba(255, 255, 255, 0.9);
+  font-size: clamp(0.8rem, 1.2vw, 1rem);
+  color: rgba(255, 255, 255, 0.8);
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
   font-family: 'Montserrat', sans-serif;
   font-weight: 300;
